@@ -1,59 +1,8 @@
 <template>
   <v-app id="inspire">
     <v-card class="overflow-hidden">
-      <v-app-bar
-          absolute
-          elevate-on-scroll
-          color="white"
-          scroll-target="#scrolling-techniques-7"
-      >
-        <v-app-bar-nav-icon large @click="drawer = true"></v-app-bar-nav-icon>
-
-        <v-spacer></v-spacer>
-        <v-toolbar-title style="color: #64A70A;font-size: 30px" class="font-weight-black">imRobot</v-toolbar-title>
-        <v-spacer></v-spacer>
-
-
-        <v-btn icon @click="newProject">
-          <v-icon large>mdi-plus</v-icon>
-        </v-btn>
-      </v-app-bar>
-      <v-navigation-drawer
-          v-model="drawer"
-          absolute
-          temporary
-      >
-        <v-list
-            nav
-            dense
-        >
-          <v-list-item-group
-              v-model="group"
-              active-class="deep-gray--text text--accent-4"
-          >
-            <v-list-item>
-              <v-list-item-icon>
-                <v-icon>mdi-home</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>主页</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-icon>
-                <v-icon>mdi-book-edit</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>案例编辑</v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-icon>
-                <v-icon>mdi-book-edit</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>测试</v-list-item-title>
-            </v-list-item>
-          </v-list-item-group>
-        </v-list>
-      </v-navigation-drawer>
-
+      <!--  导航栏  -->
+      <Nav @newProject="newProject"></Nav>
 
       <v-sheet
           id="scrolling-techniques-7"
@@ -63,16 +12,16 @@
       >
         <div style="width: 100%;">
           <div style="height: 65px"></div>
+          <!--    骨架屏      -->
+          <div style="width: 100%;height: 200px;" v-if="loading">
+            <v-skeleton-loader
+                type="image"
+                height="200px"
+            >
+            </v-skeleton-loader>
+          </div>
 
-<div style="width: 100%;height: 200px;" v-if="loading">
-  <v-skeleton-loader
-      type="image"
-      height="200px"
-  >
-  </v-skeleton-loader>
-
-</div>
-
+          <!--     轮播图     -->
           <v-carousel
               v-if="!loading"
               hide-delimiters
@@ -86,12 +35,9 @@
             ></v-carousel-item>
           </v-carousel>
 
-
+          <!--    本地项目      -->
           <div class="mt-8 pl-4 font-weight-bold text-h5">我的项目</div>
-
-
           <div style="display: flex;margin: 10px 0">
-
             <v-card class="d-flex align-center justify-center ml-3 mr-3" style="border:1px dashed #D9D9D9;"
                     flat
                     width="400px"
@@ -104,11 +50,11 @@
                   新建项目
                 </div>
               </div>
-
             </v-card>
-            <div ref="dragview" style="display: flex;width: 100%;overflow: scroll;" v-if="loading">
-              <div v-for="item in 6" :key="item">
 
+            <!--      骨架屏      -->
+            <div style="display: flex;width: 100%;overflow: scroll;" v-if="loading">
+              <div v-for="item in 6" :key="item">
                 <v-skeleton-loader
                     class="mr-3"
                     width="400px"
@@ -118,15 +64,14 @@
                 </v-skeleton-loader>
               </div>
             </div>
-            <div style="display: flex;width: 100%;overflow-x:auto;" v-scroll v-if="!loading">
 
+            <!--      本地项目列表      -->
+            <div v-scrollx style="display: flex;width: 100%;overflow-x:auto;" v-if="!loading">
               <div
                   v-for="(pro) in projects"
                   :key="pro.id"
               >
                 <v-card
-
-                    @click.native="loadProject(pro.id)"
                     class="mr-3"
                     width="400px"
                 >
@@ -137,41 +82,51 @@
                       :src="coverUrl+pro.img"
                   >
                     <div style="display: flex;flex-direction: column;height: 100%;">
+                      <div style="display: flex;flex-direction: row;justify-content: space-between">
+                        <!-- 本地项目更多操作弹窗-->
+                        <v-menu offset-y>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                icon
+                                color="white"
+                                style="background-color: rgba(0,0,0,0.1);margin-left: 4px"
+                                v-bind="attrs"
+                                v-on="on"
+                                @click.stop="moreAction(pro)">
+                              <v-icon>mdi-dots-vertical</v-icon>
+                            </v-btn>
+                          </template>
 
-
-                      <v-menu offset-y>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-btn
-                              icon
-                              color="white"
-                              v-bind="attrs"
-                              v-on="on"
-                              @click.stop="moreAction(pro)">
-                            <v-icon>mdi-dots-vertical</v-icon>
-                          </v-btn>
-                        </template>
-
-                        <v-list nav dense>
-                          <v-list-item
-                              v-for="item in dropmenus"
-                              :key="item.title"
-                              @click="dropMenuAction(pro.id,item.title)"
-                          >
-                            <v-list-item-icon>
-                              <v-icon>{{ item.icon }}</v-icon>
-                            </v-list-item-icon>
-                            <v-list-item-title class="text-caption font-weight-medium">
-                              {{ item.title }}
-                            </v-list-item-title>
-                          </v-list-item>
-                        </v-list>
-                      </v-menu>
+                          <v-list nav dense>
+                            <v-list-item
+                                v-for="item in dropmenus"
+                                :key="item.title"
+                                @click="dropMenuAction(pro.id,item.title)"
+                            >
+                              <v-list-item-icon>
+                                <v-icon>{{ item.icon }}</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-title class="text-caption font-weight-medium">
+                                {{ item.title }}
+                              </v-list-item-title>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
+                        <!-- 编辑按钮-->
+                        <v-btn
+                            icon
+                            color="white"
+                            style="background-color: rgba(0,0,0,0.1);margin-right: 4px"
+                            @click.stop="loadProject(pro.id)">
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                      </div>
 
 
                       <div style="height: 95px"></div>
+
                       <v-card-title draggable="false">{{ pro.name }}</v-card-title>
                     </div>
-
                   </v-img>
 
                 </v-card>
@@ -179,10 +134,9 @@
               </div>
               <div style="width: 20px;"></div>
             </div>
-
           </div>
 
-
+          <!--    骨架屏      -->
           <div v-if="loading">
             <div v-for="item0 in 2" :key="item0">
               <v-skeleton-loader
@@ -208,10 +162,13 @@
             </div>
 
           </div>
+
+          <!--    多行案例列表      -->
           <div v-if="!loading">
             <div v-for="(proGroup,idx0) in studyProjects" :key="idx0">
               <div class="mt-8 pl-4 font-weight-bold text-h5">{{ proGroup.type_name }}</div>
-              <div style="display: flex;width: 100%;margin: 10px 0;overflow-x:auto;" v-scroll>
+              <div v-if="!proGroup.children.length" style="margin:10px 20px;color: grey">暂无数据</div>
+              <div v-scrollx style="display: flex;width: 100%;margin: 10px 0;overflow-x:auto;">
                 <div
                     v-for="(pro,idx) in proGroup.children"
                     :key="pro.id"
@@ -220,7 +177,6 @@
                       :class="(projects.length - 1) == idx ? ' ml-3 mr-3': ' ml-3'"
                       height="200px"
                       width="400px"
-                      @click.native="showProject(pro)"
                   >
                     <v-img
                         class="white--text align-end"
@@ -228,11 +184,22 @@
                         width="400px"
                         :src="coverUrl+pro.img"
                     >
+                      <div style="width: 100%;display: flex;justify-content: space-between">
+                        <div></div>
+                        <v-btn
+                            icon
+                            color="white"
+                            style="background-color: rgba(0,0,0,0.1);margin-right: 4px;margin-left: auto;"
+                            @click.stop="showProject(pro)">
+                          <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                      </div>
+
+                      <div style="height: 95px"></div>
                       <v-card-title>{{ pro.name }}</v-card-title>
                     </v-img>
 
                   </v-card>
-
                 </div>
                 <div style="width: 20px;"></div>
               </div>
@@ -243,8 +210,10 @@
         </div>
       </v-sheet>
     </v-card>
+
+    <!--  删除本地项目确认弹窗  -->
     <v-dialog
-        v-model="dialog"
+        v-model="deleteProjectdialog"
         persistent
         max-width="290"
         style="z-index: 10009"
@@ -259,7 +228,7 @@
           <v-btn
               color="grey"
               text
-              @click="dialog = false"
+              @click="deleteProjectdialog = false"
           >
             取消
           </v-btn>
@@ -274,13 +243,12 @@
       </v-card>
     </v-dialog>
 
-
-    <Modal :show="modalShow" :title="modalTitle" @hideModal="hideModal" @submit="submit">
+    <!--  项目重命名弹窗  -->
+    <Modal :show="renameModalShow" :title="modalTitle" @hideModal="hideRenameModal" @submit="renameSubmit">
       <v-text-field
           class="centered-input text--darken-3 mt-3"
           v-model="currentSelectProjectName"
           placeholder="输入项目名称"
-
           solo-inverted
           flat
       ></v-text-field>
@@ -290,111 +258,31 @@
 </template>
 
 <script>
-import utils from "./utils";
+import utils from "./utils/utils";
 import Modal from "../../components/Modal"
-// import {scrollx} from "utils/scroll"
-//盒子滚动条拖拽
-
-let targetDrag = {  //托拽
-  isDown: false,
-  coord:{
-    x: 0,
-    y: 0
-  }
-}
-
-
-const on = function () {
-  if (document.addEventListener) {
-    return function (element, event, handler) {
-      if (element && event && handler) {
-        element.addEventListener(event, handler, false);
-      }
-    };
-  } else {
-    return function (element, event, handler) {
-      if (element && event && handler) {
-        element.attachEvent('on' + event, handler);
-      }
-    };
-  }
-}();
-
-const off = function () {
-  if (document.removeEventListener) {
-    return function (element, event, handler) {
-      if (element && event) {
-        element.removeEventListener(event, handler, false);
-      }
-    };
-  } else {
-    return function (element, event, handler) {
-      if (element && event) {
-        element.detachEvent('on' + event, handler);
-      }
-    };
-  }
-}();
-var isdrag = false
-let firstTime="",lastTime="";
-//x轴拖动回调 鼠标按下
-const scrollMousedown = event=>{
-  isdrag = true
-  firstTime = new Date().getTime();
-  console.log("scrollMousedown")
-  targetDrag.isDown = true;
-  targetDrag.coord.x = event.pageX;
-  targetDrag.coord.y = event.pageY;
-}
-//x轴拖动回调  鼠标释放
-
-const scrollMouseup = event=>{
-  event
-  console.log("scrollMouseup")
-  targetDrag.coord.x = 0;
-  targetDrag.coord.y = 0;
-  targetDrag.isDown = false;
-  // onmouseup 时的时间，并计算差值
-  lastTime = new Date().getTime();
-  if( (lastTime - firstTime) < 100){
-    // document.getElementById("dragview").setAttribute("data-flag",true)
-    isdrag = false
-  }
-
-}
-//x轴拖动回调  鼠标移动
-
-const scrollMousemove = (event,el)=>{
-  event
-  el
-
-}
+import Nav from "../../components/Nav"
+import {scrollx} from "./utils/drag/scroll"
 
 export default {
   name: "Home",
   components: {
-    Modal
+    //自定义模态弹出框，带输入框的
+    Modal,
+    //导航栏
+    Nav
+  },
+  directives: {
+    //鼠标水平拖动滑动
+    scrollx
   },
 
   data() {
     return {
-      clickable:false,
       modalTitle: '项目重命名',
-      loading: true,
-      modalShow: false,
-      newTypeModalShow:false,
-      typeName:"",
-    //     <Modal :show="newTypeModalShow" title="新增板块" @hideModal="hideTypeModal" @submit="submitTypeModal">
-    //     <v-text-field
-    // class="centered-input text--darken-3 mt-3"
-    // v-model="typeName"
-      dialog: false,
-      currentSelectProject: {},
-      currentSelectProjectName: "",
       //轮播图
       items: [
         {
-          src: this.$robotApi.carouselUrl +'c1.jpg',
+          src: this.$robotApi.carouselUrl + 'c1.jpg',
         },
         {
           src: this.$robotApi.carouselUrl + 'c2.jpg',
@@ -403,56 +291,30 @@ export default {
           src: this.$robotApi.carouselUrl + 'c3.jpg',
         },
       ],
+      //卡片菜单选项
       dropmenus: [
         {title: "上传云端", route: "", icon: "mdi-upload",},
         {title: "复制", route: "", icon: "mdi-content-copy",},
         {title: "重命名", route: "", icon: "mdi-rename-box",},
         {title: "删除", route: "", icon: "mdi-delete",},
       ],
-
+      //本地项目
       projects: [],
+      //学习案例
       studyProjects: [],
+
+      //窗口大小
       clientHeight: '',
       clientWidth: '',
-      drawer: false,
-      group: 0,
-      coverUrl:this.$robotApi.coverUrl
+
+      loading: true,//页面初始化加载显示骨架屏
+      renameModalShow: false,//项目重命名弹窗
+      deleteProjectdialog: false,//删除项目弹窗
+      currentSelectProject: {},//当前编辑项目
+      currentSelectProjectName: "",
+      coverUrl: this.$robotApi.coverUrl //卡片封面的url头
     }
   },
-
-
-  directives:{
-    scroll:{
-      inserted:function(el){
-        //鼠标按下
-        on(el,'mousedown',scrollMousedown);
-        //鼠标释放
-        on(el,'mouseup',scrollMouseup);
-        //鼠标托拽
-        on(el,'mousemove',event=>{
-          let movX = targetDrag.coord.x - event.pageX;
-          targetDrag.coord.x = event.pageX;
-          if(targetDrag.isDown){
-            el.scrollLeft = el.scrollLeft + movX;
-          }
-        });
-      },
-      unbind:function(el){
-        off(el,'mousedown',scrollMousedown);
-        off(el,'mouseup',scrollMouseup);
-        off(el,'mousemove',scrollMousemove);
-        //清空
-        targetDrag = {  //托拽
-          isDown: false,
-          coord:{
-            x: 0,
-            y: 0
-          }
-        }
-      }
-    }
-  },
-
 
   methods: {
     newProject() {
@@ -466,13 +328,7 @@ export default {
       });
     },
 
-
     loadProject(project_id) {
-      //TODO:判断是否在滚动
-      // 验证是否为点击事件，是则继续执行click事件，否则不执行
-      if(isdrag) {
-        return
-      }
       this.$router.push({
         path: '/Game/game',
         query: {
@@ -506,25 +362,24 @@ export default {
     },
 
     dropMenuAction(pro_id, title) {
-
       if (title == "重命名") {
-        this.modalShow = true
+        this.renameModalShow = true
       } else if (title == "删除") {
         this.currentSelectProject = utils.getProjectById(pro_id)
         if (this.currentSelectProject) {
-          this.dialog = true
+          this.deleteProjectdialog = true
         } else {
           alert("本地找不到该工程")
         }
         // this.deleteProject(pro_id)
       } else if (title == "上传云端") {
         alert("上传云端功能开发中")
-      }else if( title == "复制") {
+      } else if (title == "复制") {
         this.copyProject(pro_id)
       }
     },
 
-    copyProject(pro_id){
+    copyProject(pro_id) {
       var newPros = utils.copyProjectById(pro_id)
       if (newPros) {
         this.projects = newPros
@@ -534,7 +389,7 @@ export default {
     },
 
     deleteProject(pro_id) {
-      this.dialog = false
+      this.deleteProjectdialog = false
       var newPros = utils.deleteProjectById(pro_id)
       if (newPros) {
         this.projects = newPros
@@ -545,12 +400,12 @@ export default {
 
     },
 
-    hideModal() {
+    hideRenameModal() {
       // 取消弹窗回调
-      this.modalShow = false
+      this.renameModalShow = false
     },
 
-    submit() {
+    renameSubmit() {
       // 确认弹窗回调
       var newProjects = utils.renameProjectById(this.currentSelectProject.id, this.currentSelectProjectName)
       if (newProjects) {
@@ -558,26 +413,12 @@ export default {
       } else {
         alert("重命名失败")
       }
-      this.modalShow = false
-    },
-
-
-    hideTypeModal(){
-      this.newTypeModalShow = false
-    },
-
-    submitTypeModal(){
-      this.newTypeModalShow = false
+      this.renameModalShow = false
     },
 
   },
 
   async mounted() {
-
-    var myPro = window.localStorage.getItem("MyProjects")
-    if (myPro) {
-      this.projects = JSON.parse(myPro);
-    }
 
     // 获取浏览器可视区域高度
     this.clientHeight = document.documentElement.clientHeight
@@ -588,34 +429,25 @@ export default {
       that.clientWidth = document.documentElement.clientWidth
     };
 
+    //获取本地缓存的项目列表
+    var myPro = window.localStorage.getItem("MyProjects")
+    if (myPro) {
+      this.projects = JSON.parse(myPro);
+    }
 
+    //获取云端学习案例列表
     var quickStartBlocks = await this.$request.callApi("GET", this.$robotApi.getAllBlocks)
     console.log("quickStartBlocks", quickStartBlocks)
     this.studyProjects = quickStartBlocks.data
-    setTimeout(function (){
+    setTimeout(function () {
       that.loading = false
-    },1000)
+    }, 1000)
   },
 
   watch: {
-    modalShow() {
-      if (this.modalShow) {
+    renameModalShow() {
+      if (this.renameModalShow) {
         this.currentSelectProjectName = this.currentSelectProject.name
-      }
-    },
-    group() {
-      //导航切换
-      console.log("group", this.group)
-      if (this.group == 1) {
-        //案例编辑
-        this.$router.push({
-          path: "/Game/caseEdit?edit=1"
-        })
-
-      }else if(this.group == 2){
-        this.$router.push({
-          path: "/Game/test"
-        })
       }
     },
   },
@@ -624,11 +456,6 @@ export default {
 </script>
 
 <style scoped>
-::-webkit-scrollbar {
-  /*隐藏滚轮*/
-  display: none;
-}
-
 /*input 样式*/
 /deep/ .centered-input input {
   text-align: center;
@@ -636,31 +463,33 @@ export default {
   font-size: 20px;
 }
 
+/*修改弹窗输入框的样式*/
 /deep/ .centered-input input::placeholder {
-  /*color: red!important;*/
-  /*opacity: 1;*/
   text-align: center;
   font-size: 20px;
 }
 
-
-/**
-页面禁止选中文字
- */
-*{
-  -webkit-touch-callout:none;  /*系统默认菜单被禁用*/
-  -webkit-user-select:none; /*webkit浏览器*/
-  -khtml-user-select:none; /*早期浏览器*/
-  -moz-user-select:none;/*火狐*/
-  -ms-user-select:none; /*IE10*/
-  user-select:none;
+/*隐藏滚轮*/
+::-webkit-scrollbar {
+  display: none;
 }
 
-input{
-  -webkit-user-select:auto; /*webkit浏览器*/
-}
-textarea{
-  -webkit-user-select:auto; /*webkit浏览器*/
+
+/*页面禁止选中文字*/
+* {
+  -webkit-touch-callout: none; /*系统默认菜单被禁用*/
+  -webkit-user-select: none; /*webkit浏览器*/
+  -khtml-user-select: none; /*早期浏览器*/
+  -moz-user-select: none; /*火狐*/
+  -ms-user-select: none; /*IE10*/
+  user-select: none;
 }
 
+input {
+  -webkit-user-select: auto; /*webkit浏览器*/
+}
+
+textarea {
+  -webkit-user-select: auto; /*webkit浏览器*/
+}
 </style>

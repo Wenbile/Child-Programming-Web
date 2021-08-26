@@ -12,8 +12,6 @@
           dense
       >
 
-<!--        playlist-edit-->
-
         <v-list-item
             link
             @click="jumpTypeEdit"
@@ -204,7 +202,7 @@
       </v-btn>
 
 
-      <blocklycomponent id="blockly2" :options="options" :robotController="robotController" :projectId="projectId"
+      <blocklycomponent id="blockly2" :robotController="robotController" :projectId="projectId"
                         ref="foo"></blocklycomponent>
       <div class="window1" v-window="windowParams" v-show="show3D">
         <div class="window__header">
@@ -325,17 +323,15 @@ import './blocks/stocks';
 
 import BlocklyJS from 'blockly/javascript';
 
-
 import Modal from "../../components/Modal"
-// import utils from "./utils";
 import Blockly from "blockly";
-import utils from "./utils";
+import utils from "./utils/utils";
 
 
 export default {
   name: "caseEdit",
   components: {
-    'blocklycomponent': blocklycomponent,
+    blocklycomponent,
     Modal
   },
   data() {
@@ -380,126 +376,6 @@ export default {
       code: '',
       //机器人控制实例
       robotController: null,
-      options: {
-        media: 'media/',
-        zoom:
-            {
-              controls: true,
-              wheel: false,//鼠标滚动缩放
-              startScale: 1.0,
-              maxScale: 3,
-              minScale: 0.8,
-              scaleSpeed: 1.2
-            },
-        trashcan: false,//垃圾桶
-        scrollbars: true,
-        theme: "deuteranopia",
-        renderer: "zelos",
-        move: {
-          scrollbars: {
-            horizontal: true,
-            vertical: true
-          },
-          drag: true,
-          wheel: true
-        },
-        oneBasedIndex: true,
-        horizontalLayout: true,//工具箱水平
-        toolboxPosition: "end",//工具箱在底部
-        grid:
-            {
-              spacing: 100,
-              length: 3,
-              colour: '#ccc',
-              snap: true//网格吸附
-            },
-        toolbox:
-            {
-              "kind": "flyoutToolbox",
-              "contents": [
-                {
-                  "kind": "block",
-                  "type": "while_program_start",
-                },
-                {
-                  "kind": "block",
-                  "type": "move",
-                },
-                {
-                  "kind": "block",
-                  "type": "turn",
-                },
-                {
-                  "kind": "block",
-                  "type": "arc"
-                },
-                {
-                  "kind": "block",
-                  "type": "draw"
-                },
-                {
-                  "kind": "block",
-                  "type": "pencilcolor"
-                },
-                {
-                  "kind": "block",
-                  "type": "controls_repeat_ext"
-                },
-                {
-                  "kind": "block",
-                  "type": "controls_whileUntil"
-                },
-                {
-                  "kind": "block",
-                  "type": "controls_if"
-                },
-                {
-                  "kind": "block",
-                  "type": "logic_compare"
-                },
-                {
-                  "kind": "block",
-                  "type": "logic_operation"
-                },
-                {
-                  "kind": "block",
-                  "type": "logic_negate"
-                },
-                {
-                  "kind": "block",
-                  "type": "logic_boolean"
-                },
-                {
-                  "kind": "sep",
-                  "gap": "32"
-                },
-                {
-                  "kind": "block",
-                  "blockxml": "<block type='math_number'><field name='NUM'>10</field></block>"
-                },
-                {
-                  "kind": "block",
-                  "type": "math_arithmetic"
-                },
-                {
-                  "kind": "block",
-                  "type": "math_single"
-                },
-                {
-                  "kind": "block",
-                  "type": "text"
-                },
-                {
-                  "kind": "block",
-                  "type": "text_length"
-                },
-                {
-                  "kind": "block",
-                  "type": "text_print"
-                },
-              ]
-            }
-      }
     }
   },
   methods: {

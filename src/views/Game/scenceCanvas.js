@@ -8,7 +8,7 @@ import * as BABYLON_MATERAIAL from "babylonjs-materials"
 import * as GUI from 'babylonjs-gui';
 
 import ammo from "ammo.js";
-import utils from "./utils";
+import utils from "./utils/utils";
 import api from "../../api"
 
 var debug = false

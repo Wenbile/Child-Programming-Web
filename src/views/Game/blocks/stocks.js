@@ -192,13 +192,6 @@ Blockly.defineBlocksWithJsonArray(
 Blockly.JavaScript['while_program_start'] = function (block) {
   block
   var while_content = Blockly.JavaScript.statementToCode(block, 'while_content');
-  // var code = 'robot.init();\n' +
-  //             'async function allTasks () {\n' +
-  //             while_content +
-  //             '}\n' +
-  //             'allTasks();\n' +
-  //             'robot.stop();\n';
-
   var code = 'robot.init();\n' +
       while_content +
       'robot.stop();\n';

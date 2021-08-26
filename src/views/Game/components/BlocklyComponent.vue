@@ -12,36 +12,154 @@
 import Blockly from 'blockly';
 import Interpreter from 'js-interpreter'
 import {FixedEdgesMetricsManager} from '@blockly/fixed-edges';
-import utils from "../utils";
+import utils from "../utils/utils";
 import * as hans from 'blockly/msg/zh-hans'
 Blockly.setLocale(hans);
 
-// import * as d3 from "d3-selection";
-// import {ContinuousToolbox, ContinuousFlyout, ContinuousMetrics} from '@blockly/continuous-toolbox';
+
 export default {
   name: 'BlocklyComponent',
-  props: ['options','robotController',"projectId"],
+  props: ['robotController',"projectId"],
   data() {
     return {
       robotCtr:null,
       workspace: null,
       isStop:true,
       runNext:0,
-      // isCodeRuning:false,
+      // blockly参数设定
+      options: {
+        media: 'media/',
+        zoom:
+            {
+              controls: true,
+              wheel: false,//鼠标滚动缩放
+              startScale: 1.0,
+              maxScale: 3,
+              minScale: 0.8,
+              scaleSpeed: 1.2
+            },
+        trashcan: false,//垃圾桶
+        scrollbars: true,
+        theme: "deuteranopia",
+        renderer: "zelos",
+        move: {
+          scrollbars: {
+            horizontal: true,
+            vertical: true
+          },
+          drag: true,
+          wheel: true
+        },
+        oneBasedIndex: true,
+        horizontalLayout: true,//工具箱水平
+        toolboxPosition: "end",//工具箱在底部
+        grid:
+            {
+              spacing: 100,
+              length: 3,
+              colour: '#ccc',
+              snap: true//网格吸附
+            },
+        toolbox:
+            {
+              "kind": "flyoutToolbox",
+              "contents": [
+                {
+                  "kind": "block",
+                  "type": "while_program_start",
+                },
+                {
+                  "kind": "block",
+                  "type": "move",
+                },
+                {
+                  "kind": "block",
+                  "type": "turn",
+                },
+                {
+                  "kind": "block",
+                  "type": "arc"
+                },
+                {
+                  "kind": "block",
+                  "type": "draw"
+                },
+                {
+                  "kind": "block",
+                  "type": "pencilcolor"
+                },
+                {
+                  "kind": "block",
+                  "type": "controls_repeat_ext"
+                },
+                {
+                  "kind": "block",
+                  "type": "controls_whileUntil"
+                },
+                {
+                  "kind": "block",
+                  "type": "controls_if"
+                },
+                {
+                  "kind": "block",
+                  "type": "logic_compare"
+                },
+                {
+                  "kind": "block",
+                  "type": "logic_operation"
+                },
+                {
+                  "kind": "block",
+                  "type": "logic_negate"
+                },
+                {
+                  "kind": "block",
+                  "type": "logic_boolean"
+                },
+                {
+                  "kind": "sep",
+                  "gap": "32"
+                },
+                {
+                  "kind": "block",
+                  "blockxml": "<block type='math_number'><field name='NUM'>10</field></block>"
+                },
+                {
+                  "kind": "block",
+                  "type": "math_arithmetic"
+                },
+                {
+                  "kind": "block",
+                  "type": "math_single"
+                },
+                {
+                  "kind": "block",
+                  "type": "text"
+                },
+                {
+                  "kind": "block",
+                  "type": "text_length"
+                },
+                {
+                  "kind": "block",
+                  "type": "text_print"
+                },
+              ]
+            }
+      }
     }
   },
 
   methods:{
     runCodeClick(){
       console.log("runCodeClick")
-      // if(!isCodeRuning){
+
       if(this.isStop){
         window.step_btn()
       }else{
         console.log("程序还没运行完，别急")
       }
 
-      // }
 
     },
     stopCodeClick(){
@@ -68,7 +186,7 @@ export default {
   },
 
   mounted() {
-    var options = this.$props.options || {};
+    var options = this.options;
     if (!options.toolbox) {
       options.toolbox = this.$refs["blocklyToolbox"];
     }
@@ -91,71 +209,12 @@ export default {
 
     this.workspace = Blockly.inject(this.$refs["blocklyDiv"], options);
 
-
-    // this.workspace.scrollbar = new Blockly.Scrollbar(this.workspace, false);
-
-    // console.log("this.workspace.trashcan",this.workspace.trashcan.getBoundingRectangle())
-    // var rect2 = this.workspace.trashcan.getBoundingRectangle()
-    // var rect = new Blockly.utils.Rect(rect2.top,rect2.bottom,0,rect2.right-rect2.left)
-    // console.log("rect",rect)
-    // this.workspace.trashcan.position(this.workspace.getMetricsManager().getUiMetrics(),rect)
-    // Blockly.svgResize(Blockly.getMainWorkspace())
-
-
-    // Blockly.Blocks['block_type'] = {
-    //   init: function() {
-    //     this.appendDummyInput()
-    //         .appendField("when program start");
-    //     this.setPreviousStatement(true, null);
-    //     this.setNextStatement(true, null);
-    //     this.setColour(315);
-    //     this.setTooltip("123");
-    //     this.setHelpUrl("1");
-    //   }
-    // };
-
-
-    // var that = this
-    // function onFirstComment(event) {
-    //   if (event.type == Blockly.Events.VIEWPORT_CHANGE) {
-    //     Blockly.svgResize(Blockly.getMainWorkspace())
-    //     console.log("blockly在缩放");
-    //     // d3.selectAll('g.blocklyTrash').attr('transform', 'translate(0,35)')
-    //
-    //     //transform="translate(2,0) scale(1.290784508319092)"
-    //     //transform: translate(2, 0) scale(0.821267, 0.821267);
-    //     // d3.selectAll('g.blocklyBlockCanvas').attr('transform', 'translate(2, 0) scale(1, 1)')
-    //     // d3.selectAll('path.blocklyFlyoutBackground').attr('d', 'M 0,8 a 8 8 0 0 1 8 -8 h 1298 a 8 8 0 0 1 8 8 v 93 h -1314 z')
-    //     // d3.selectAll('svg.blocklyFlyout').attr('style', 'display: block; transform: translate(0px, 770px);').attr('height','101')
-    //
-    //
-    //     // for (const svgKey in svg._groups[0]) {
-    //     //
-    //     // }
-    //     // console.log(svg)
-    //     // console.log(svg._groups[0])
-    //     // for (const svgKey in svg._groups[0]) {
-    //     //
-    //     // }
-    //     // document.getElementsByClassName('blocklyBlockCanvas')[1].style.transform = "translate(2, 0) scale(1, 1)"
-    //     // that.workspace.removeChangeListener(onFirstComment);
-    //   }
-    // }
-    //
-    // this.workspace.addChangeListener(onFirstComment);
-
     /**
      * 实时存储代码库到本地
      */
 
     var that = this
     function myUpdateFunction(event) {
-      // utils.debugLog("event",event)
-      // const code_js = Blockly.JavaScript.workspaceToCode(that.workspace);
-      // utils.debugLog('存储的js: ', code_js);
-      // const xml = Blockly.Xml.workspaceToDom(that.workspace);
-      // const xml_text = Blockly.Xml.domToText(xml);
-      // window.localStorage.setItem('xml_text',xml_text);
 
         //更新高亮代码
         if (!(event instanceof Blockly.Events.Ui)) {
@@ -164,11 +223,6 @@ export default {
     }
 
     this.workspace.addChangeListener(myUpdateFunction);
-
-    // //获取本地存储的代码块
-    // const xml_text = window.localStorage.getItem('xml_text');
-    // const xml = Blockly.Xml.textToDom(xml_text);
-    // Blockly.Xml.domToWorkspace(xml, this.workspace);
 
 
     /**
@@ -179,8 +233,7 @@ export default {
     var myInterpreter = null;
 
     function initApi(interpreter, globalObject) {
-      // console.log("globalObject",globalObject)
-      // Add an API function for highlighting blocks.
+
       var hightlightWrapper = function(id) {
         // console.log("highlightBlock")
         that.isStop = false
@@ -291,20 +344,13 @@ export default {
     }
 
     function stepCode() {
-      // console.log("robotCtr",that.robotCtr)
-      // console.log("stepCode")
       if (!myInterpreter) {
-        // First statement of this code.
-        // Clear the program output.
+
         resetStepUi(true);
         utils.debugLog("latestCode",latestCode)
         myInterpreter = new Interpreter(latestCode, initApi);
 
-        // And then show generated code in an alert.
-        // In a timeout to allow the outputArea.value to reset first.
         setTimeout(function() {
-          // alert('Ready to execute the following code\n' +
-          //     '===================================\n' + latestCode);
           highlightPause = true;
           stepCode();
         }, 1);
@@ -317,7 +363,7 @@ export default {
           var hasMoreCode = myInterpreter.step();
         } finally {
           if (!hasMoreCode) {
-            // Program complete, no more code to execute.
+
             utils.debugLog('代码执行完了');
 
             myInterpreter = null;
@@ -325,8 +371,7 @@ export default {
 
           }
         }
-        // Keep executing until a highlight statement is reached,
-        // or the code completes or errors.
+
       } while (hasMoreCode && !highlightPause);
     }
 
@@ -348,7 +393,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .blocklyDiv {
   width: calc(100vw - 50px);

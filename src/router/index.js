@@ -4,7 +4,7 @@ import game from "../views/Game/game";
 import home from "../views/Game/home"
 import caseEdit from "../views/Game/caseEdit";
 import  typeEdit from "../views/Game/typeEdit";
-import test from "../views/Game/test";
+import test from "../views/Class/test";
 
 
 Vue.use(VueRouter)
@@ -47,7 +47,7 @@ const routes = [
     }
   },
   {
-    path: "/Game/test",
+    path: "/Class/test",
     name: 'test',
     component: test,
     meta: {
