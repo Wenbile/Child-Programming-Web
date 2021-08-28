@@ -4,7 +4,8 @@
 基于vue框架，使用blockly和babylonjs实现的少儿编程网页
 
 ## 项目结构
-├── LICENSE
+
+```├── LICENSE
 ├── README.md
 ├── blockly_compressed.js
 ├── package-lock.json
@@ -13,52 +14,44 @@
 │   ├── index.html
 │   └── robot.ico
 ├── src
-│   ├── App.vue
-│   ├── api.js
-│   ├── assets
-│   │   └── iconfont
-│   │       ├── iconfont.css
-│   │       ├── iconfont.eot
-│   │       ├── iconfont.js
-│   │       ├── iconfont.json
-│   │       ├── iconfont.svg
-│   │       ├── iconfont.ttf
-│   │       ├── iconfont.woff
-│   │       └── iconfont.woff2
+│   ├── App.vue //页面启动加载页
+│   ├── api.js //后端api接口定义
+│   ├── assets //字体资源
 │   ├── components
-│   │   ├── Modal.vue
-│   │   └── Nav.vue
-│   ├── main.js
-│   ├── plugins
-│   │   └── vuetify.js
-│   ├── request.js
+│   │   ├── Modal.vue //自定义模态弹窗组件
+│   │   └── Nav.vue //自定义导航栏组件
+│   ├── main.js //主函数，这里初始化Vue工程，配置全局变量
+│   ├── plugins 
+│   │   └── vuetify.js // 引入vuetify核心库
+│   ├── request.js // 封装请求方法
 │   ├── router
-│   │   └── index.js
+│   │   └── index.js // 路由配置
 │   └── views
-│       ├── Class
-│       │   ├── class1.vue
-│       │   ├── class2.vue
+│       ├── Class //博客课程
+│       │   ├── class1.vue // Vue实现图形化积木式编程（一）
+│       │   ├── class2.vue //Vue实现图形化积木式编程（二）
+│       │   ├── class3.vue //Vue实现图形化积木式编程（三）
 │       │   └── test.vue
 │       └── Game
-│           ├── babylon
-│           │   ├── robot.js
-│           │   └── scenceCanvas.js
+│           ├── babylon //封装的babylon方法
+│           │   ├── robot.js //机器人控制方法封装
+│           │   └── scenceCanvas.js //场景实例
 │           ├── blockly
 │           │   ├── blocks
-│           │   │   └── stocks.js
+│           │   │   └── stocks.js //自定义代码块和代码块生成代码
 │           │   └── components
-│           │       └── BlocklyComponent.vue
-│           ├── caseEdit.vue
-│           ├── game.vue
-│           ├── home.vue
-│           ├── typeEdit.vue
+│           │       └── BlocklyComponent.vue //代码块显示与执行代码序列化
+│           ├── caseEdit.vue //案例编辑
+│           ├── game.vue //自由代码块编辑与仿真
+│           ├── home.vue //主页
+│           ├── typeEdit.vue //板块编辑
 │           └── utils
-│               ├── drag
+│               ├── drag //鼠标点击拖动组件封装
 │               │   ├── dom.js
 │               │   └── scroll.js
 │               └── utils.js
-├── tree.md
 └── vue.config.js
+```
 
 
 
