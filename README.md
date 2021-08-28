@@ -1,7 +1,64 @@
 # 少儿编程
 
-#### 介绍
+## 介绍
 基于vue框架，使用blockly和babylonjs实现的少儿编程网页
+
+## 项目结构
+├── LICENSE
+├── README.md
+├── blockly_compressed.js
+├── package-lock.json
+├── package.json
+├── public
+│   ├── index.html
+│   └── robot.ico
+├── src
+│   ├── App.vue
+│   ├── api.js
+│   ├── assets
+│   │   └── iconfont
+│   │       ├── iconfont.css
+│   │       ├── iconfont.eot
+│   │       ├── iconfont.js
+│   │       ├── iconfont.json
+│   │       ├── iconfont.svg
+│   │       ├── iconfont.ttf
+│   │       ├── iconfont.woff
+│   │       └── iconfont.woff2
+│   ├── components
+│   │   ├── Modal.vue
+│   │   └── Nav.vue
+│   ├── main.js
+│   ├── plugins
+│   │   └── vuetify.js
+│   ├── request.js
+│   ├── router
+│   │   └── index.js
+│   └── views
+│       ├── Class
+│       │   ├── class1.vue
+│       │   ├── class2.vue
+│       │   └── test.vue
+│       └── Game
+│           ├── babylon
+│           │   ├── robot.js
+│           │   └── scenceCanvas.js
+│           ├── blockly
+│           │   ├── blocks
+│           │   │   └── stocks.js
+│           │   └── components
+│           │       └── BlocklyComponent.vue
+│           ├── caseEdit.vue
+│           ├── game.vue
+│           ├── home.vue
+│           ├── typeEdit.vue
+│           └── utils
+│               ├── drag
+│               │   ├── dom.js
+│               │   └── scroll.js
+│               └── utils.js
+├── tree.md
+└── vue.config.js
 
 
 
