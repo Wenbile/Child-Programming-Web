@@ -5,9 +5,10 @@
 
 ## 项目结构
 
-```├── LICENSE
+```
+├── LICENSE
 ├── README.md
-├── blockly_compressed.js
+├── blockly_compressed.js // 需要替换node_modules/blockly/blockly_compressed.js
 ├── package-lock.json
 ├── package.json
 ├── public
@@ -42,14 +43,14 @@
 │           │   └── components
 │           │       └── BlocklyComponent.vue //代码块显示与执行代码序列化
 │           ├── caseEdit.vue //案例编辑
-│           ├── game.vue //自由代码块编辑与仿真
+│           ├── game.vue //自由代码块编辑与仿真页
 │           ├── home.vue //主页
 │           ├── typeEdit.vue //板块编辑
 │           └── utils
 │               ├── drag //鼠标点击拖动组件封装
 │               │   ├── dom.js
 │               │   └── scroll.js
-│               └── utils.js
+│               └── utils.js //封装通用方法
 └── vue.config.js
 ```
 
