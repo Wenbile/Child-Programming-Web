@@ -1,8 +1,6 @@
-const ApiUrl = "http://127.0.0.1:8088/"
-const ApiRootUrl = ApiUrl + "robot/";//接口根目录
+const ApiUrl = "http://127.0.0.1:8088/"//接口根目录
+const ApiRootUrl = ApiUrl + "robot/"
 const resourceUrl = ApiUrl + "static/"
-// const ApiRootUrl = 'https://api.imit.ltd:8081';
-
 
 // 路由管理
 export default {

@@ -7,9 +7,9 @@ import * as BABYLON_MATERAIAL from "babylonjs-materials"
 
 import * as GUI from 'babylonjs-gui';
 
-import ammo from "ammo.js";
-import utils from "./utils/utils";
-import api from "../../api"
+import ammo from "../../../../node_modules/ammo.js/builds/ammo";
+import utils from "../utils/utils";
+import api from "../../../api"
 
 var debug = false
 //显示速度选择窗
@@ -45,8 +45,12 @@ var sstartingPoint = null
 
 //机器人控制实例
 var robotCotroller = null
-var scale = 0.8 //机器人大小缩放
+var scale = 1 //机器人大小缩放
 const scalingFactor = scale / 10;
+
+var robotScale = 50
+const robotScalingFactor = robotScale / 10;
+
 // [Kg]
 var bodyMass = 0.5, bodyFriction = 0.5, bodyRestitution = 0.9;
 
@@ -570,23 +574,10 @@ var scenceCanvas = {
         advancedTexture.addControl(speedSelect);
     },
 
-    makePhysicsObjects(newMeshes, scene, scaling) {
-        // Create physics root and position it to be the center of mass for the imported mesh
+    makePhysicsObjects(newMeshes, scene, scaling,size) {
         var physicsRoot = new BABYLON.Mesh("robot", scene);
-        // physicsRoot.position.y -= 0.9;
 
-        // For all children labeled box (representing colliders), make them invisible and add them as a child of the root object
-        newMeshes.forEach((m, i) => {
-            i
-            if (m.name.indexOf("box") != -1 && m.name != "__root__") {
-                m.isVisible = false
-                physicsRoot.addChild(m)
-            }
-        })
-
-        // Add all root nodes within the loaded gltf to the physics root
-        newMeshes.forEach((m, i) => {
-            i
+        newMeshes.forEach((m) => {
             if (m.parent == null) {
                 physicsRoot.addChild(m)
             }
@@ -594,46 +585,54 @@ var scenceCanvas = {
 
         // Make every collider into a physics impostor
         physicsRoot.getChildMeshes().forEach((m) => {
-            // if(m.name.indexOf("box") != -1){
             m.scaling.x = Math.abs(m.scaling.x)
             m.scaling.y = Math.abs(m.scaling.y)
             m.scaling.z = Math.abs(m.scaling.z)
+            // console.log("m.name",m.name)
             m.physicsImpostor = new BABYLON.PhysicsImpostor(m, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0.1}, scene);
-            // }
         })
 
         // Scale the root object and turn it into a physics impsotor
         physicsRoot.scaling.scaleInPlace(scaling)
+        // physicsRoot.scaling = new BABYLON.Vector3(scaling,scaling,scaling)
+
         physicsRoot.physicsImpostor = new BABYLON.PhysicsImpostor(physicsRoot, BABYLON.PhysicsImpostor.NoImpostor, {
             mass: bodyMass,
             friction: bodyFriction,
             restitution: bodyRestitution
         }, scene);
 
+        //转为碰撞体后，其y轴会偏移
+        const impostorOffset = - (size.y) / 1.1
+        // const impostorOffset = - (size.y) / 2
+        physicsRoot.physicsImpostor.setDeltaPosition(new BABYLON.Vector3(0, impostorOffset,0));
+        physicsRoot.position.subtractInPlace(new BABYLON.Vector3(0, -impostorOffset, 0));
+
+
         return physicsRoot
     },
 
 
     async initRobot() {
-
+        // const modelName = "robot.babylon"
         const modelName = "sportcar.babylon"
+        // const modelName = "aodi.babylon"
         console.log("api.modelUrl",api.modelUrl)
         var result = await BABYLON.SceneLoader.ImportMeshAsync(null, api.modelUrl, modelName, scene);
 
         var newMeshes = result.meshes
         // var robotBody = utils.getMeshFromMeshs(newMeshes, "bumpers")
         var robotBody = utils.getMeshFromMeshs(newMeshes, "Glass_Plane.006")
+        // var robotBody = utils.getMeshFromMeshs(newMeshes, "car_Mesh.154_car_Mesh.001_Material_#25.002")
         console.log('robotBody',robotBody)
 
         var robotSize = utils.getMeshSize(robotBody)
         console.log('robotSize',robotSize)
 
-
-
         var parent = new BABYLON.Mesh("robot", scene);
         // //
         //2、笔
-        var pencil = new BABYLON.TransformNode("pencil");
+        var pencil = new BABYLON.Mesh("pencil");
         var faceUV = [];
         //0 1 2 底 中 顶
         faceUV[0] = new BABYLON.Vector4(0, 0, 0, 0);
@@ -644,9 +643,9 @@ var scenceCanvas = {
         //0 1 2 底 中 顶
         faceColors[0] = new BABYLON.Color4(0.5, 0.5, 0.5, 1)
         faceColors[2] = new BABYLON.Color3(16 / 255.0, 156 / 255.0, 73 / 255.0)//顶部绿色
-        var pencilHeight = robotSize.y * 2
+        var pencilHeight = robotSize.y * 4
         var pencilDownOffset = robotSize.y / 2
-        var pencilDiameter = 0.2 * scalingFactor
+        var pencilDiameter = 0.3 * robotSize.x
         var cylinder = BABYLON.MeshBuilder.CreateCylinder("cylinder", {
             height: pencilHeight,
             diameter: pencilDiameter,
@@ -704,33 +703,7 @@ var scenceCanvas = {
 
         newMeshes.push(pencil)
 
-        //3、眼睛
-        var eyeMaterial = new BABYLON.StandardMaterial("eyeMaterial", scene);
-
-        var eyeRadius = 0.02 * robotSize.x
-
-        var eyeLeft = BABYLON.MeshBuilder.CreateDisc("eye", {radius: eyeRadius, updatable: true}, scene);
-
-        eyeMaterial.diffuseColor = new BABYLON.Color3(54 / 255.0, 1, 1);
-        eyeMaterial.freeze()
-        eyeLeft.material = eyeMaterial
-        eyeLeft.rotation._x = cylinder.rotation._x + Math.PI / 2
-        eyeLeft.position._y = robotSize.y / 2 + 0.022 * scalingFactor
-        eyeLeft.position._z = -robotSize.x / 3.2
-        eyeLeft.position._x = -robotSize.z / 6
-        // eyeLeft.parent = parent
-
-        var eyeRight = BABYLON.MeshBuilder.CreateDisc("eye", {radius: eyeRadius, updatable: true}, scene);
-
-        eyeRight.material = eyeMaterial
-        eyeRight.rotation._x = cylinder.rotation._x + Math.PI / 2
-        eyeRight.position._y = robotSize.y / 2 + 0.022 * scalingFactor
-        eyeRight.position._z = -robotSize.x / 3.2
-        eyeRight.position._x = robotSize.z / 6
-        newMeshes.push(eyeLeft)
-        newMeshes.push(eyeRight)
-
-        var physicsRoot = this.makePhysicsObjects(newMeshes, scene, 10 / scalingFactor)
+        var physicsRoot = this.makePhysicsObjects(newMeshes, scene, robotScalingFactor,robotSize)
 
         console.log("physicsRoot",physicsRoot)
         // physicsRoot.position.y += 2
@@ -740,8 +713,13 @@ var scenceCanvas = {
         parent = robotEmulator
 
 
+
         engine.hideLoadingUI();
-        document.getElementById("customLoadingScreenDiv").remove()
+        var lodingDiv = document.getElementById("customLoadingScreenDiv")
+        if(lodingDiv){
+            lodingDiv.outerHTML = ""
+        }
+
 
         setTimeout(function () {
             scenceCanvas.ArcAnimation(0, 0, 470 * scale / 5)
@@ -783,12 +761,10 @@ var scenceCanvas = {
             this._loadingDiv = document.createElement("div");
             this._loadingDiv.id = "customLoadingScreenDiv";
             this._loadingDiv.style.background = "#505781";
-            // this._loadingDiv.style.marginTop = "40px";
             this._loadingDiv.style.height = "100%";
             this._loadingDiv.style.width = "700px";
             this._loadingDiv.style.alignContent = "center";
             this._loadingDiv.style.zIndex = "10006"
-            // this._loadingDiv.innerHTML = "scene is currently loading";
             var img = new Image()
             img.src = url + "loading.gif";
             img.style.padding = "15%";

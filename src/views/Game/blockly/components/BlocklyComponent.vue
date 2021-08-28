@@ -12,7 +12,7 @@
 import Blockly from 'blockly';
 import Interpreter from 'js-interpreter'
 import {FixedEdgesMetricsManager} from '@blockly/fixed-edges';
-import utils from "../utils/utils";
+import utils from "../../utils/utils";
 import * as hans from 'blockly/msg/zh-hans'
 Blockly.setLocale(hans);
 

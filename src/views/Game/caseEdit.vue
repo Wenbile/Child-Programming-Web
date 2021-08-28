@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <!--侧边导航栏-->
     <v-navigation-drawer
         v-show="edit"
         v-model="drawer"
@@ -7,23 +8,22 @@
         temporary
         style="z-index: 10009"
     >
+      <!--侧边板块列表-->
       <v-list
           nav
           dense
       >
-
         <v-list-item
             link
             @click="jumpTypeEdit"
         >
           <v-list-item-icon>
-            <v-icon v-text="editIcon"></v-icon>
+            <v-icon v-text="'mdi-playlist-edit'"></v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title v-text="editText"></v-list-item-title>
+            <v-list-item-title v-text="'编辑板块'"></v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-
         <v-list-group
             v-for="item in studyProjects"
             :key="item.type_name"
@@ -37,7 +37,6 @@
               <v-list-item-title v-text="item.type_name"></v-list-item-title>
             </v-list-item-content>
           </template>
-
           <v-list-item
               v-for="child in item.children"
               :key="child.id"
@@ -49,63 +48,16 @@
               <v-list-item-title v-text="child.name"></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          <!--          </v-list-item-group>-->
         </v-list-group>
       </v-list>
-
     </v-navigation-drawer>
+
+
     <div style="height: 100%;width: 100%;">
+      <!--底部标题栏-->
       <div class="navgationbar" @click="saveProject">
-
-        <v-dialog
-            v-model="showDialog"
-            persistent
-            max-width="290"
-            style="z-index: 10009"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-                class="backbtn"
-                elevation="0"
-                rounded
-                icon
-                large
-                color="#80441E"
-                v-bind="attrs"
-                v-on="on"
-            >
-
-              <v-icon>mdi-reply</v-icon>
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title class="text-h5">
-              确定退出吗？
-            </v-card-title>
-            <v-card-text>退出之前保存项目，可以在下次进入后继续编辑</v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                  color="grey"
-                  text
-                  @click="backAction"
-              >
-                继续退出
-              </v-btn>
-              <v-btn
-                  color="green darken-1"
-                  text
-                  @click="saveProject"
-              >
-                保存
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-
-
-        <div class="title"> {{projectId ? projectTitle : "新项目" }}</div>
-
+        <div class="title"> {{ projectId ? projectTitle : "新项目" }}</div>
+        <!--打开侧边板块列表，选择旧项目-->
         <v-btn
             v-show="edit"
             :class="prepareTitle ?'listbtn':'nonelistbtn'"
@@ -119,8 +71,7 @@
           <v-icon>mdi-menu</v-icon>
           <div v-show="!prepareTitle">选择旧项目</div>
         </v-btn>
-
-
+        <!--按钮的更多操作，增删-->
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
@@ -137,7 +88,6 @@
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
-
           <v-list nav dense>
             <v-list-item
                 v-for="item in moreActionMenus"
@@ -153,8 +103,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-
-
+        <!--蓝牙连接按钮，未开发-->
         <v-btn
             class="blebtn"
             elevation="0"
@@ -166,8 +115,8 @@
         >
           <v-icon>mdi-bluetooth-audio</v-icon>
         </v-btn>
-
       </div>
+      <!--运行仿真-->
       <v-btn
           class="btnplay"
           elevation="0"
@@ -179,6 +128,7 @@
       >
         <v-icon>mdi-play</v-icon>
       </v-btn>
+      <!--停止运行仿真-->
       <v-btn
           class="btnstop"
           elevation="0"
@@ -190,6 +140,7 @@
       >
         <v-icon>mdi-stop</v-icon>
       </v-btn>
+      <!--显示3d界面-->
       <v-btn
           v-show="!show3D"
           class="btn3d"
@@ -201,16 +152,15 @@
         <v-icon>mdi-menu-open</v-icon>
       </v-btn>
 
-
-      <blocklycomponent id="blockly2" :robotController="robotController" :projectId="projectId"
-                        ref="foo"></blocklycomponent>
+      <!--blockly模块-->
+      <blocklycomponent id="blockly" :robotController="robotController" :projectId="projectId" ref="blockRef"></blocklycomponent>
+      <!--3d仿真拖动窗口-->
       <div class="window1" v-window="windowParams" v-show="show3D">
         <div class="window__header">
           <div style="display: flex;justify-content: space-between;">
             <div style="padding: 10px 20px 5px 20px; color: white;display: flex">仿真
               <div id="fps"></div>
             </div>
-
             <v-btn
                 icon
                 @click="close3dAction"
@@ -221,14 +171,12 @@
             </v-btn>
           </div>
         </div>
-
-        <!--        3d-->
+        <!--3d渲染界面-->
         <div style="z-index: 10001;padding-left: 10px;" v-show="show3D">
-          <canvas id="renderCanvas">
-
-          </canvas>
+          <canvas id="renderCanvas"></canvas>
         </div>
       </div>
+      <!--生成代码页-->
       <div class="window1" v-window="windowParams" v-show="!show3D">
         <div class="window__header">
           <div style="display: flex;justify-content: space-between;">
@@ -241,8 +189,54 @@
           <pre v-html="code"></pre>
         </div>
       </div>
+      <!--删除项目提示-->
+      <v-dialog
+          v-model="showDeleteDialog"
+          persistent
+          max-width="290"
+          style="z-index: 10009"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+              class="backbtn"
+              elevation="0"
+              rounded
+              icon
+              large
+              color="#80441E"
+              v-bind="attrs"
+              v-on="on"
+          >
 
-      <Modal :show="showModal" :title="title" @hideModal="hideModal" @submit="submit">
+            <v-icon>mdi-reply</v-icon>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title class="text-h5">
+            确定退出吗？
+          </v-card-title>
+          <v-card-text>退出之前保存项目，可以在下次进入后继续编辑</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                color="grey"
+                text
+                @click="backAction"
+            >
+              继续退出
+            </v-btn>
+            <v-btn
+                color="green darken-1"
+                text
+                @click="saveProject"
+            >
+              保存
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!--设置项目名称弹窗-->
+      <Modal :show="showSaveProjectModal" :title="'保存项目'" @hideModal="hideSaveProjectModal" @submit="saveProjectSubmit">
         <v-text-field
             class="centered-input text--darken-3 mt-3"
             v-model="prepareTitle"
@@ -252,7 +246,7 @@
             flat
         ></v-text-field>
       </Modal>
-
+      <!--新增项目配置，需要选择板块-->
       <Modal :show="newBlockShow" title="新增项目配置" @hideModal="hideNewBlockModal" @submit="submitNewBlockModal">
         <v-text-field
             class="centered-input text--darken-3 mt-3"
@@ -272,7 +266,6 @@
             flat
         ></v-select>
       </Modal>
-
     </div>
   </v-app>
 
@@ -283,15 +276,14 @@
 /**
  * babylon
  ***/
-import scenceCanvas from "./scenceCanvas";
+import scenceCanvas from "./babylon/scenceCanvas";
 
-import robot from './robot'
+import robot from './babylon/robot'
 
 window.robot = robot
 
 var sceneToRender = null;
 
-// window.addEventListener('DOMContentLoaded', () => loadScene(),false);
 /******* 场景创建 ******/
 async function loadScene() {
 
@@ -318,8 +310,8 @@ async function loadScene() {
 /**
  * blocky
  */
-import blocklycomponent from './components/BlocklyComponent.vue'
-import './blocks/stocks';
+import blocklycomponent from './blockly/components/BlocklyComponent.vue'
+import './blockly/blocks/stocks';
 
 import BlocklyJS from 'blockly/javascript';
 
@@ -336,43 +328,36 @@ export default {
   },
   data() {
     return {
-      edit: 0,//是否可编辑
-      typeSelect:-1,
-      editIcon:"mdi-playlist-edit",
-      editText:"编辑板块",
-      projectId: null,
-      showDialog: false,
-      isExitAfterSave: false,
-      show3D: true,
-      isShowCode: true,
-      projectTitle: "",
-      prepareTitle: "",
-      newBlockShow:false,
-      newBlockName:"",
-      drawer: false,
-      currentSelectItem: [0, 0],
-      currentSelectGroup: 0,
-      currentSelectProject: null,
-      group: 0,
-      studyProjects: [],
+      edit: 0,//是否可编辑，0用户只读或者保存为本地项目  1编辑模式，可修改云端项目
+      typeSelect: -1,//侧边栏板块列表选择下标
+      projectId: null,//项目id
+      showDeleteDialog: false,//删除项目弹窗
+      show3D: true,//显示3d仿真界面
+      projectTitle: "",//项目标题
+      prepareTitle: "",//项目预标题
+      newBlockShow: false,//新项目保存
+      newBlockName: "",//新项目名称
+      drawer: false,//侧边板块显示状态
+      currentSelectProject: null,//当前编辑项目
+      studyProjects: [],//板块列表
+      //案例更多选择
       moreActionMenus: [
         {title: "新增案例", route: "", icon: "mdi-shape-square-plus",},
         {title: "删除案例", route: "", icon: "mdi-trash-can-outline",},
       ],
-      typeNames:[{
-        id:1,
-        type_name:"学习案例"
+      //侧边板块列表
+      typeNames: [{
+        id: 1,
+        type_name: "学习案例"
       }],
-      items: [],
 
-      title: '保存项目',
-      showModal: false,
-
+      showSaveProjectModal: false,//显示保存弹窗
+      //可拖动窗口配置
       windowParams: {
         movable: true,
         resizable: false
       },
-
+      //blockly生成代码
       code: '',
       //机器人控制实例
       robotController: null,
@@ -380,7 +365,7 @@ export default {
   },
   methods: {
     /**
-     * babylon
+     * 显示3d仿真界面
      */
     show3DAction() {
       console.log("show3DAction")
@@ -388,105 +373,112 @@ export default {
       if (this.show3D == false) {
         this.showCode()
       }
-
     },
 
+    /**
+     * 隐藏3d仿真界面
+     */
     close3dAction() {
       this.show3D = false
     },
 
-
-    playAction() {
-      this.$refs["foo"].runCodeClick()
-    },
-
-    stopAction() {
-      this.$refs["foo"].stopCodeClick()
-    },
-
+    /**
+     * 导航栏点击触发保存项目弹窗
+     */
     saveProject() {
-      this.showDialog = false
-      if(this.projectId == null){
+      this.showDeleteDialog = false
+      if (this.projectId == null) {
         this.newBlockShow = true
-      }else {
-
-        this.showModal = true
+      } else {
+        this.showSaveProjectModal = true
       }
-
     },
 
-
+    /**
+     * 点击返回按钮
+     */
     backAction() {
-      this.showDialog = false
+      this.showDeleteDialog = false
       this.$router.replace("/")
     },
 
+    /**
+     * 运行代码
+     */
+    playAction() {
+      this.$refs["blockRef"].runCodeClick()
+    },
 
     /**
-     * blocky
+     * 停止运行代码
+     */
+    stopAction() {
+      this.$refs["blockRef"].stopCodeClick()
+    },
+
+    /**
+     * 显示代码块生成的代码
      */
     showCode() {
-      this.code = BlocklyJS.workspaceToCode(this.$refs["foo"].workspace);
-      // this.$refs["foo"].clc()
+      this.code = BlocklyJS.workspaceToCode(this.$refs["blockRef"].workspace);
+      // this.$refs["blockRef"].clc()
       // eval(this.code)
     },
 
-    hideModal() {
+    /**
+     * 隐藏保存项目弹窗
+     */
+    hideSaveProjectModal() {
       // 取消弹窗回调
-      this.showModal = false
+      this.showSaveProjectModal = false
     },
 
-    submit() {
+    /**
+     * 弹窗中点击保存项目处理
+     */
+    saveProjectSubmit() {
       // 确认弹窗回调
       this.projectTitle = this.prepareTitle
       if (!this.edit && this.prepareTitle) {
         //只读模式
-
         this.saveProjectToLocal()
       } else {
         //编辑模式
         this.saveCaseToServer()
       }
-
-      this.showModal = false
+      this.showSaveProjectModal = false
     },
 
-    typeSelectAction(data){
+    /**
+     * 保存项目时，选择板块列表的某一项
+     * @param data
+     */
+    typeSelectAction(data) {
       this.typeSelect = data
     },
 
-
+    /**
+     * 保存项目到本地
+     */
     saveProjectToLocal() {
-
-      this.showModal = false
-
-
-      const xml = Blockly.Xml.workspaceToDom(this.$refs["foo"].workspace);
+      this.showSaveProjectModal = false
+      const xml = Blockly.Xml.workspaceToDom(this.$refs["blockRef"].workspace);
       const xml_text = Blockly.Xml.domToText(xml);
-
       var new_pro_id = utils.createProjectId()
       window.localStorage.setItem(new_pro_id, xml_text);
-
       var myProjectsList = utils.getLocalProjects()
-
       const newtime = new Date().Format("yyyy-MM-dd HH:mm:ss")
-
       var newProject =
           {
             "id": new_pro_id,
             "name": this.projectTitle,
             "time": newtime,
             "update_time": newtime,
-            "img": "default_ela.png",
+            "img": "art.jpg",
           }
-
       myProjectsList.push(newProject)
-
       window.localStorage.setItem("MyProjects", JSON.stringify(myProjectsList));
-
-
       alert("保存成功")
-
     },
 
     /**
@@ -494,38 +486,27 @@ export default {
      */
     async saveCaseToServer() {
 
-      if(this.projectId == null){
+      if (this.projectId == null) {
         //新增案例
         console.log("新增案例")
         //编辑案例
         this.currentSelectProject.id = utils.createProjectId()
         this.currentSelectProject.name = this.projectTitle
 
-        const xml = Blockly.Xml.workspaceToDom(this.$refs["foo"].workspace);
+        const xml = Blockly.Xml.workspaceToDom(this.$refs["blockRef"].workspace);
         const xml_text = Blockly.Xml.domToText(xml);
 
         this.currentSelectProject.blocks = xml_text
         console.log(this.currentSelectProject)
-
-        // var re = await this.$request.callApi("POST", this.$robotApi.addBlock, this.currentSelectProject)
-        // if (!re.errno) {
-        //   alert(re.data)
-        // } else {
-        //   alert(re.data)
-        // }
-
-      }else {
+      } else {
         //编辑案例
         console.log("编辑案例")
         this.currentSelectProject.name = this.projectTitle
 
-        const xml = Blockly.Xml.workspaceToDom(this.$refs["foo"].workspace);
+        const xml = Blockly.Xml.workspaceToDom(this.$refs["blockRef"].workspace);
         const xml_text = Blockly.Xml.domToText(xml);
-
         this.currentSelectProject.blocks = xml_text
-
         console.log(this.currentSelectProject)
-
         var re = await this.$request.callApi("POST", this.$robotApi.saveBlock, this.currentSelectProject)
         if (!re.errno) {
           alert(re.data)
@@ -533,13 +514,14 @@ export default {
           alert(re.data)
         }
       }
-
     },
 
+    /**
+     * 获取侧边板块选择的项目并加载
+     */
     getProject() {
       this.projectId = this.$route.query.project_id
       if (this.projectId) {
-
         var selectProject = null
         for (const idx in this.studyProjects) {
           for (const block of this.studyProjects[idx].children) {
@@ -553,23 +535,25 @@ export default {
           }
         }
 
-
         if (selectProject) {
           this.currentSelectProject = selectProject
           var xml_text = selectProject.blocks;
           console.log("xml_text", xml_text)
           if (xml_text) {
             // 清空工作区的内容
-            this.$refs["foo"].workspace.clear()
+            this.$refs["blockRef"].workspace.clear()
             const xml = Blockly.Xml.textToDom(xml_text);
-            Blockly.Xml.domToWorkspace(xml, this.$refs["foo"].workspace);
+            Blockly.Xml.domToWorkspace(xml, this.$refs["blockRef"].workspace);
           }
         }
-
 
       }
     },
 
+    /**
+     * 板块更多操作
+     * @param title
+     */
     dropMenuAction(title) {
       console.log(title)
 
@@ -581,80 +565,86 @@ export default {
       }
     },
 
-
-
-
-    hideNewBlockModal(){
+    /**
+     * 隐藏新增案例弹窗
+     */
+    hideNewBlockModal() {
       this.newBlockShow = false
     },
 
+    /**
+     * 新增案例请求提交
+     */
     async submitNewBlockModal() {
-
-      console.log("add",this.typeSelect)
-      if(this.typeSelect==-1){
+      console.log("add", this.typeSelect)
+      if (this.typeSelect == -1) {
         alert("请选择板块")
         return
       }
 
-
-
-      const xml = Blockly.Xml.workspaceToDom(this.$refs["foo"].workspace);
+      const xml = Blockly.Xml.workspaceToDom(this.$refs["blockRef"].workspace);
       const xml_text = Blockly.Xml.domToText(xml);
 
-      var result = await this.$request.callApi("POST", this.$robotApi.addBlock, {type:this.typeSelect,name: this.newBlockName,blocks:xml_text})
+      var result = await this.$request.callApi("POST", this.$robotApi.addBlock, {
+        type: this.typeSelect,
+        name: this.newBlockName,
+        blocks: xml_text
+      })
 
       if (result) {
         this.newBlockShow = false
-
-        this.$router.push({path:this.$route.path + "?edit=1&project_id="+result.data.id})
+        this.$router.push({path: this.$route.path + "?edit=1&project_id=" + result.data.id})
         this.projectTitle = this.newBlockName
         this.prepareTitle = this.newBlockName
         this.initProjects()
         alert("新增成功")
-      }else {
+      } else {
         this.newBlockShow = false
         alert("新增失败")
       }
     },
 
-    async deleteBlock(){
-      if(!this.projectId){
+    /**
+     * 删除案例
+     * @returns {Promise<void>}
+     */
+    async deleteBlock() {
+      if (!this.projectId) {
         alert("案例不存在")
         return
       }
-      console.log("delete",this.projectId)
-
-
-      var result = await this.$request.callApi("POST", this.$robotApi.deleteBlock, {id:this.projectId})
-
+      console.log("delete", this.projectId)
+      var result = await this.$request.callApi("POST", this.$robotApi.deleteBlock, {id: this.projectId})
       if (result) {
         this.newEmptyProject()
         alert("删除成功")
-      }else {
+      } else {
         alert("删除失败")
       }
-
-
     },
 
-
-
-    newEmptyProject(){
-      if(this.projectId){
-        this.$refs["foo"].workspace.clear()
+    /**
+     * 新建空项目
+     */
+    newEmptyProject() {
+      if (this.projectId) {
+        this.$refs["blockRef"].workspace.clear()
         this.prepareTitle = ""
         this.projectTitle = ""
         this.projectId = null
-        this.$router.push({path:this.$route.path + "?edit=1"})
+        this.$router.push({path: this.$route.path + "?edit=1"})
         this.initProjects()
-      }else{
+      } else {
         alert("已在新增页面")
       }
 
     },
 
-
-    async initProjects(){
+    /**
+     * 初始化侧边列表
+     * @returns {Promise<void>}
+     */
+    async initProjects() {
       var quickStartBlocks = await this.$request.callApi("GET", this.$robotApi.getAllBlocks)
 
       quickStartBlocks = quickStartBlocks.data
@@ -662,10 +652,21 @@ export default {
       this.getProject()
     },
 
-    jumpTypeEdit(){
-      this.$router.push({path:"/Game/typeEdit"})
+    /**
+     * 跳转板块编辑页
+     */
+    jumpTypeEdit() {
+      this.$router.push({path: "/Game/typeEdit"})
     },
 
+  },
+
+  beforeDestroy(){
+    //清除3d动画loading div
+    var lodingDiv = document.getElementById("customLoadingScreenDiv")
+    if(lodingDiv){
+      lodingDiv.outerHTML = ""
+    }
   },
 
   async mounted() {
@@ -677,29 +678,21 @@ export default {
     //新建3d场景
     var robotctl = await loadScene();
     this.robotController = robotctl
-
-
   },
 
   watch: {
     '$route.query'() {
       console.log("change $route.query.project_id", this.$route.query.project_id)
       this.getProject()
-
     }
-
-
   },
 }
 </script>
 
 <style scoped>
 #renderCanvas {
-  /*position: fixed;*/
   width: 680px;
   height: 680px;
-  /*top: 40px;*/
-  /*right: 0;*/
   touch-action: none;
   z-index: 10000;
   border-radius: 10px;
@@ -719,25 +712,8 @@ html, body {
   margin: 0;
 }
 
-#code {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  background-color: beige;
-}
 
-#blockly1 {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 50%;
-  height: 50%;
-}
-
-#blockly2 {
+#blockly {
   position: absolute;
   left: 50px;
   top: 50px;

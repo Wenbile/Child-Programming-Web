@@ -98,17 +98,19 @@ var utils = {
     copyProjectById(pro_id){
         var myProjectsList=this.getLocalProjects()
         var isFind = false
+        var newProId = this.createProjectId()
         for (const myProjectsListElement of myProjectsList) {
             if(myProjectsListElement.id==pro_id){
                 var newPro = JSON.parse(JSON.stringify(myProjectsListElement))
                 newPro.name = newPro.name + "(复制)"
-                newPro.id = this.createProjectId()
+                newPro.id = newProId
                 myProjectsList.push(newPro)
                 isFind = true
                 break
             }
         }
         if(isFind){
+            window.localStorage.setItem(newProId,window.localStorage.getItem(pro_id))
             window.localStorage.setItem("MyProjects", JSON.stringify(myProjectsList));
             return myProjectsList
         }else {

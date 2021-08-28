@@ -165,11 +165,11 @@
 
 <script>
 
-import scenceCanvas from "./scenceCanvas";
-import robot from './robot'
+import scenceCanvas from "./babylon/scenceCanvas";
+import robot from './babylon/robot'
 
-import blocklycomponent from './components/BlocklyComponent.vue'
-import './blocks/stocks';
+import blocklycomponent from './blockly/components/BlocklyComponent.vue'
+import './blockly/blocks/stocks';
 import BlocklyJS from 'blockly/javascript';
 import Blockly from "blockly";
 
@@ -236,6 +236,7 @@ export default {
       }
     }
   },
+
   methods: {
     /**
      * 显示3d仿真界面
@@ -268,7 +269,9 @@ export default {
      */
     backAction() {
       this.showExitDialog = false
-      this.$router.back()
+      console.log("backAction")
+
+      this.$router.replace("/")
     },
 
     /**
@@ -362,6 +365,14 @@ export default {
     },
   },
 
+  beforeDestroy(){
+    //清除3d动画loading div
+    var lodingDiv = document.getElementById("customLoadingScreenDiv")
+    if(lodingDiv){
+      lodingDiv.outerHTML = ""
+    }
+  },
+
   async mounted() {
     //获取本地存储的项目信息
     this.projectId = this.$route.query.project_id
@@ -383,6 +394,7 @@ export default {
     var robotctl = await loadScene()
     this.robotController = robotctl
   }
+
 }
 </script>
 

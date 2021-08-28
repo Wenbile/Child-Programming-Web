@@ -1,5 +1,5 @@
 import * as Blockly from 'blockly/core'
-import api from "../../../api"
+import api from "../../../../api"
 
 /**
  * 自定义组件

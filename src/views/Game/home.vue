@@ -317,6 +317,7 @@ export default {
   },
 
   methods: {
+    //----------------本地项目增查-----------------
     newProject() {
       var project_id = utils.createProjectId()
       console.log("project_id", project_id)
@@ -346,16 +347,7 @@ export default {
       });
     },
 
-    editProject(pro) {
-      this.$router.push({
-        path: '/Game/caseEdit',
-        query: {
-          edit: 1,
-          project_id: pro.id
-        }
-      });
-    },
-
+    //---------------本地项目更多操作，改删-------------------
     moreAction(pro) {
       this.currentSelectProject = pro
       console.log("moreAction")
@@ -381,6 +373,7 @@ export default {
 
     copyProject(pro_id) {
       var newPros = utils.copyProjectById(pro_id)
+      console.log("copyProject,newPros",newPros)
       if (newPros) {
         this.projects = newPros
       } else {
