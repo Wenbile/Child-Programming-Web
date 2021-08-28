@@ -1,10 +1,19 @@
 # 少儿编程
-
 ## 介绍
 基于vue框架，使用blockly和babylonjs实现的少儿编程网页
+## 实现效果
+### 主页
+![img.png](src/assets/readme/img.png)
+### 游戏页
+![img_2.png](src/assets/readme/img_2.png)
+### 案例编辑页
+![img_3.png](src/assets/readme/img_3.png)
+### 板块编辑页
+![img_4.png](src/assets/readme/img_4.png)
 
+## 服务器后端
+https://github.com/Wenbile/Child-Programming-Server
 ## 项目结构
-
 ```
 ├── LICENSE
 ├── README.md
@@ -53,8 +62,6 @@
 │               └── utils.js //封装通用方法
 └── vue.config.js
 ```
-
-
 
 ## npm版本
 ```
