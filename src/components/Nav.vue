@@ -83,7 +83,7 @@ export default {
 
       } else if (this.group == 2) {
         this.$router.push({
-          path: "/Game/test"
+          path: "/Class/test"
         })
       }
     },
