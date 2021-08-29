@@ -127,7 +127,7 @@ function dragListening() {
 async function initRobot() {
   console.log('initRobot')
   //模型url路径
-  const url = "http://localhost:8887/"
+  const url = "http://localhost:8088/static/model/"
   //模型名称
   const modelName = "sportcar.babylon"
   var result = await BABYLON.SceneLoader.ImportMeshAsync(null, url, modelName, scene);
