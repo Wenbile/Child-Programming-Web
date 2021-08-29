@@ -1,6 +1,6 @@
 # 少儿编程
 ## 介绍
-基于vue框架，使用blockly和babylonjs实现的少儿编程网页
++ 基于vue框架，使用blockly和babylonjs实现的少儿编程网页
 ## 实现效果
 ### 主页
 ![img.png](src/assets/readme/img.png)

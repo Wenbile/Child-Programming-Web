@@ -583,7 +583,7 @@ var scenceCanvas = {
             }
         })
 
-        // Make every collider into a physics impostor
+        // 将所有碰撞体加入physics impostor
         physicsRoot.getChildMeshes().forEach((m) => {
             m.scaling.x = Math.abs(m.scaling.x)
             m.scaling.y = Math.abs(m.scaling.y)
@@ -592,9 +592,8 @@ var scenceCanvas = {
             m.physicsImpostor = new BABYLON.PhysicsImpostor(m, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0.1}, scene);
         })
 
-        // Scale the root object and turn it into a physics impsotor
+        // 缩放根对象并将其变成physics impostor
         physicsRoot.scaling.scaleInPlace(scaling)
-        // physicsRoot.scaling = new BABYLON.Vector3(scaling,scaling,scaling)
 
         physicsRoot.physicsImpostor = new BABYLON.PhysicsImpostor(physicsRoot, BABYLON.PhysicsImpostor.NoImpostor, {
             mass: bodyMass,
@@ -602,9 +601,8 @@ var scenceCanvas = {
             restitution: bodyRestitution
         }, scene);
 
-        //转为碰撞体后，其y轴会偏移
+        //转为碰撞体后，其y轴会偏移，偏移比例根据实际调整
         const impostorOffset = - (size.y) / 1.1
-        // const impostorOffset = - (size.y) / 2
         physicsRoot.physicsImpostor.setDeltaPosition(new BABYLON.Vector3(0, impostorOffset,0));
         physicsRoot.position.subtractInPlace(new BABYLON.Vector3(0, -impostorOffset, 0));
 
