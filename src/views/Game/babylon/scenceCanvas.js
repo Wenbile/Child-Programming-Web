@@ -261,7 +261,6 @@ var scenceCanvas = {
 
     initGridPlane() {
 
-        // const scalingFactor = scale / 10;
         const groundSide = scale * 100 * padSide;
         var ground = BABYLON.Mesh.CreateGround("ground", groundSide, groundSide, 1, scene, true);
         var groundMaterial = new BABYLON_MATERAIAL.GridMaterial("grid", scene);
@@ -278,22 +277,9 @@ var scenceCanvas = {
         groundMaterial.minorUnitVisibility = 0;
         const gridOffset = 0.5 * groundSide / padGridCellCount; // This makes the grid cells to be aligned with the pad's borders.
         groundMaterial.gridOffset = new BABYLON.Vector3(gridOffset, 0, gridOffset);
-        // groundMaterial.gridRatio = padGridCellCount;
 
-        // ground.material = groundMaterial;
         ground.material = groundMaterial
-        // ground.material.gridRatio = 9;
-        //大网格间距
-        // ground.material.majorUnitFrequency = 50;
-        // //小网格间距
-        // ground.material.minorUnitVisibility = 0;
-        //网格线颜色
-        // ground.material.lineColor = new BABYLON.Color3(0.0, 0.0, 0.0);
-        // ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, {
-        //     mass: 0,
-        //     restitution: 1,
-        //     friction: 1
-        // }, scene);
+
         sground = ground
         return ground
     },
@@ -309,8 +295,7 @@ var scenceCanvas = {
             height: groundSide,
             subdivisions: 1
         }, scene);
-        //Create dynamic texture
-
+        //创建动态材质
         penclDynamicTexture = new BABYLON.DynamicTexture("dynamic texture", textureResolution, scene);
         // var pencilContext = penclDynamicTexture.getContext();
 
@@ -332,21 +317,6 @@ var scenceCanvas = {
             restitution: groundRestitution,
             friction: groundFriction
         }, scene);
-
-        // dynamicMaterial.emissiveTexture = texture; // Makes the drawn text to become emissive.
-
-
-        //Draw on canvas
-        // pencilContext.beginPath();
-        // pencilContext.lineWidth = 10;
-        // pencilContext.fillStyle = "green";
-        // pencilContext.strokeStyle = "green";
-        // pencilContext.moveTo(0, 0);
-        // pencilContext.lineTo(0, 100);
-        // pencilContext.quadraticCurveTo(0, 0, 0, 100);
-        // // pencilContext.fill();
-        // pencilContext.stroke();
-        // penclDynamicTexture.update();
 
         spencilGround = ground
     },
@@ -372,9 +342,10 @@ var scenceCanvas = {
     },
 
 
-    createBasicRoundedBox: function (scene, name, size, mass = 0.25, restitution = 0.5, friction = 0.5) {
-        const boxSide = size; // [m].
-        const sphereSide = boxSide * 3.1 / 2; // ~ 3/2 of the box's side.
+    createBasicRoundedBox: function (scene, name, size) {
+        let mass = 0.25, restitution = 0.5, friction = 0.5
+        const boxSide = size;
+        const sphereSide = boxSide * 3.1 / 2;
         const sphere = BABYLON.MeshBuilder.CreateSphere('sphere', {diameter: sphereSide, segments: 16}, scene);
         const box = BABYLON.Mesh.CreateBox('box', boxSide, scene);
         const intersection = BABYLON.CSG.FromMesh(box).intersect(BABYLON.CSG.FromMesh(sphere));
@@ -391,9 +362,9 @@ var scenceCanvas = {
             BABYLON.PhysicsImpostor.BoxImpostor,
             {mass: mass, restitution: restitution, /*1,*/ friction: friction}
         );
-        roundedBox.material.freeze(); // Optimization.
+        roundedBox.material.freeze();
         roundedBox.material.specularColor = new BABYLON.Color3(0, 0, 0);
-        roundedBox.freezeWorldMatrix() // Optimization.
+        roundedBox.freezeWorldMatrix()
 
         return roundedBox;
     },
@@ -466,6 +437,7 @@ var scenceCanvas = {
     },
 
     initButtons() {
+        console.log('gui',GUI)
         var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
 
         var restartBtn = GUI.Button.CreateImageOnlyButton(
@@ -730,16 +702,6 @@ var scenceCanvas = {
         sparent = parent
         return parent
     },
-
-//     getMeshSize(checkmesh){
-//     const sizes = checkmesh.getHierarchyBoundingVectors()
-//     const size = {
-//         x: (sizes.max.x - sizes.min.x) ,
-//         y: (sizes.max.y - sizes.min.y) ,
-//         z: (sizes.max.z - sizes.min.z)
-//     }
-//     return size
-// },
 
     getRobot() {
         return sparent
