@@ -1,8 +1,38 @@
 <template>
   <div style="height: 100%;width: 100%;">
-    <div>
-      <canvas id="renderCanvas"></canvas>
+    <!--窗口关闭后显示的开启按钮-->
+    <v-btn
+        icon
+        color="#505781"
+        style="padding: 10px 20px 5px 20px;position: absolute;right: 10px;top: 10px;"
+        v-show="!show3Dcanvans"
+        @click="show3Dcanvans=!show3Dcanvans"
+    >
+      <v-icon>mdi-equal-box</v-icon>
+    </v-btn>
+    <!--可移动窗口-->
+    <div id="window1" v-window="windowParams" v-show="show3Dcanvans">
+      <!--顶栏-->
+      <div id="header" style="display: flex;justify-content: space-between;">
+        <!--标题-->
+        <div class="header">仿真
+        </div>
+        <!--关闭窗口按钮-->
+        <v-btn
+            icon
+            color="white"
+            style="padding: 10px 20px 5px 20px;"
+            @click="show3Dcanvans=!show3Dcanvans"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </div>
+      <!--3d引擎cavans-->
+      <div style="z-index: 10001;padding-left: 10px;">
+        <canvas id="renderCanvas"></canvas>
+      </div>
     </div>
+
     <div style="display: flex;justify-content: space-around;width: 680px;">
       <div>
         <label>alpha:</label>
@@ -41,7 +71,6 @@ import * as BABYLON_MATERAIAL from "babylonjs-materials"
 import * as GUI from 'babylonjs-gui';
 import ammo from "ammo.js";
 import utils from "./utils";
-
 
 
 const url = "http://localhost:8088/static/simulator/"
@@ -98,7 +127,7 @@ async function loadScene() {
     ArcAnimation(-1.5649881922490174, 0, 68.84955592153878)
   }, 1500)
 
-  //本文内容，babylonjs-gui 按钮实现
+  //可看文章七，babylonjs-gui 按钮实现
   initButtons()
 
 }
@@ -190,7 +219,7 @@ function initButtons() {
   speedBtn.thickness = 0;
   speedBtn.onPointerClickObservable.add(function () {
     speedSelect.isVisible = !speedSelect.isVisible
-    if(speedSelect.isVisible){
+    if (speedSelect.isVisible) {
       buttonClicked = true//设置速度选择弹窗弹窗状态为true，用于弹窗后移动模型时取消弹窗状态
     }
   });
@@ -284,17 +313,12 @@ function hideLoadingUI() {
 function customLoadingUI() {
 
   BABYLON.DefaultLoadingScreen.prototype.displayLoadingUI = function () {
-    if (document.getElementById("customLoadingScreenDiv")) {
-      document.getElementById("customLoadingScreenDiv").style.display = "initial";
-      return;
-    }
     this._loadingDiv = document.createElement("div");
     this._loadingDiv.id = "customLoadingScreenDiv";
     this._loadingDiv.style.background = "#505781";
-    this._loadingDiv.style.height = "100%";
-    this._loadingDiv.style.width = "700px";
-    this._loadingDiv.style.alignContent = "center";
     this._loadingDiv.style.zIndex = "10006"
+    this._loadingDiv.style.height = "100%"
+
     var img = new Image()
     img.src = url + "loading.gif";
     img.style.padding = "15%";
@@ -303,7 +327,18 @@ function customLoadingUI() {
 
     this._resizeLoadingUI();
     window.addEventListener("resize", this._resizeLoadingUI);
-    document.body.appendChild(this._loadingDiv);
+
+    //这两个样式修改需要在this._resizeLoadingUI之后，因为该函数执行后会相对window窗口定位出cavans的位置，然后设置loading的位置
+    //而我们需要的是将其插入到可移动窗口中，以统一窗口的开启关闭
+    this._loadingDiv.style.left = "10px"
+    this._loadingDiv.style.top = "39px"
+
+    // document.body.appendChild(this._loadingDiv);
+    // 修改为
+    // 获取当前可移动窗口元素
+    let window1 = document.getElementById('window1')
+    let header = document.getElementById('header')
+    window1.insertBefore(this._loadingDiv,header)
   };
 
   engine.displayLoadingUI();
@@ -544,7 +579,7 @@ function dragListening() {
   //鼠标点击后松开
   var onPointerUp = function () {
     //如果速度选择窗口位关闭，则关闭窗口
-    if(buttonClicked){
+    if (buttonClicked) {
       buttonClicked = false
       speedSelect.isVisible = false
     }
@@ -663,7 +698,14 @@ function initScene() {
 export default {
   name: "test",
   data() {
-    return {}
+    return {
+      show3Dcanvans: true,
+      //移动窗口配置
+      windowParams: {
+        movable: true,
+        resizable: false
+      }
+    }
   },
   async mounted() {
     //加载场景
@@ -706,5 +748,22 @@ export default {
   margin: 5px;
   border-radius: 4px;
   width: 50px;
+}
+
+#window1 {
+  background-color: #505781;
+  border-radius: 10px;
+  width: 700px;
+  position: absolute;
+  top: 5px;
+  right: 55px;
+  z-index: 10005;
+}
+
+
+.header {
+  padding: 10px 20px 5px 20px;
+  color: white;
+  display: flex;
 }
 </style>
