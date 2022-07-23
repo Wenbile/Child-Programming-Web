@@ -105,6 +105,7 @@
         </v-menu>
         <!--蓝牙连接按钮，未开发-->
         <v-btn
+            v-if="false"
             class="blebtn"
             elevation="0"
             rounded

@@ -3,8 +3,9 @@
     <div style="height: 100%;width: 100%;">
       <!--   导航栏   -->
       <div class="navgationbar" @click="saveProject">
-        <div class="title"> {{ projectTitle ? projectTitle : "imRobot新项目" }}</div>
+        <div class="title"> {{ projectTitle ? projectTitle : "新项目" }}</div>
         <v-btn
+            v-if="false"
             class="blebtn"
             elevation="0"
             rounded

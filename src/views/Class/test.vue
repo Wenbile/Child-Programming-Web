@@ -1,7 +1,66 @@
 <template>
   <div style="height: 100%;width: 100%;">
-    <div>
-      <canvas id="renderCanvas"></canvas>
+    <!--窗口关闭后显示的开启按钮-->
+    <v-btn
+        icon
+        color="#505781"
+        style="padding: 10px 20px 5px 20px;position: absolute;right: 10px;top: 10px;"
+        v-show="!show3Dcanvans"
+        @click="show3Dcanvans=!show3Dcanvans"
+    >
+      <v-icon>mdi-equal-box</v-icon>
+    </v-btn>
+    <!--可移动窗口-->
+    <div id="window1" v-window="windowParams" v-show="show3Dcanvans">
+      <!--顶栏-->
+      <div id="header" style="display: flex;justify-content: space-between;">
+        <!--标题-->
+        <div class="header">仿真
+        </div>
+        <!--关闭窗口按钮-->
+        <v-btn
+            icon
+            color="white"
+            style="padding: 10px 20px 5px 20px;"
+            @click="show3Dcanvans=!show3Dcanvans"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </div>
+      <!--3d引擎cavans-->
+      <div style="z-index: 10001;padding-left: 10px;">
+        <canvas id="renderCanvas"></canvas>
+      </div>
+    </div>
+
+    <div style="display: flex;justify-content: space-around;width: 680px;">
+      <div>
+        <label>alpha:</label>
+        <button type="button" class="btn"
+                @click="setCameraPosition('alpha',Math.PI/10)">+
+        </button>
+        <button type="button" class="btn"
+                @click="setCameraPosition('alpha',-Math.PI/10)">-
+        </button>
+      </div>
+      <div>
+        <label>beta:</label>
+        <button type="button" class="btn"
+                @click="setCameraPosition('beta',Math.PI/10)">+
+        </button>
+        <button type="button" class="btn"
+                @click="setCameraPosition('beta',-Math.PI/10)">-
+        </button>
+      </div>
+      <div>
+        <label>radius:</label>
+        <button type="button" class="btn"
+                @click="setCameraPosition('radius',Math.PI)">+
+        </button>
+        <button type="button" class="btn"
+                @click="setCameraPosition('radius',-Math.PI)">-
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -9,8 +68,12 @@
 <script>
 import * as BABYLON from 'babylonjs';
 import * as BABYLON_MATERAIAL from "babylonjs-materials"
+import * as GUI from 'babylonjs-gui';
 import ammo from "ammo.js";
 import utils from "./utils";
+
+
+const url = "http://localhost:8088/static/simulator/"
 
 //全局变量
 var scene = null //场景实例
@@ -23,20 +86,27 @@ var car = null //小车
 var cubeParent = null //方块组
 var startingPoint = new BABYLON.Vector3(0, 0, 0)//当前点击位置
 
-// 质量 、摩擦系数、反弹系数
+//质量 、摩擦系数、反弹系数
 const bodyMass = 0.5, bodyFriction = 0.5, bodyRestitution = 0.9;
 const groundFriction = 0.8, groundRestitution = 0.5;
+
+let speedSelect = null//显示速度选择窗
+let buttonClicked = false//按钮是否被点击
 
 async function loadScene() {
   //场景初始化，可看文章一
   scene = initScene()
+
+  //可看文章五，自定义启动动画
+  customLoadingUI()
+
   //加载网络模型，可看文章二
   await initRobot()
 
   //可看文章三，监听拖动事件，实现点击拖动模型
   dragListening()
 
-  //本文内容
+  //可看文章四，实现碰撞效果
   // 1、初始化重力碰撞系统
   await initAmmo()
   // 2、将地面和小车加入碰撞体
@@ -44,9 +114,234 @@ async function loadScene() {
   //3、加入碰撞体方块
   initCubes()
 
-  //开启debug窗口
-  // scene.debugLayer.show()
+  //可看文章五，关闭启动动画
+  setTimeout(() => {
+    hideLoadingUI()
+  }, 1000)
 
+  //可看文章六，相机控制与相机动画
+  setTimeout(function () {
+    console.log(camera.alpha, camera.beta, camera.radius)
+    //摄像机原位置 1.1383885512243588 1.3642551964995249 50
+    //通过相机控制输出获取期望值，然后填入
+    ArcAnimation(-1.5649881922490174, 0, 68.84955592153878)
+  }, 1500)
+
+  //可看文章七，babylonjs-gui 按钮实现
+  initButtons()
+
+}
+
+
+function initButtons() {
+  //在场景中设置一个全屏的前景2d界面
+  var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("btnsUI", true, scene);
+
+  //初始化重启按钮
+  var restartBtn = GUI.Button.CreateImageOnlyButton(
+      "but",
+      url + "restart.png"
+  );
+  restartBtn.height = "60px";
+  restartBtn.width = "60px";
+  restartBtn.thickness = 0;//边框
+  restartBtn.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT//在全屏的水平排列方位
+  restartBtn.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM//在全屏的垂直排列方位
+  restartBtn.top = "-20px"//顶部偏移量
+  restartBtn.left = "-20px"//左侧偏移量
+  //按钮点击时间监听回调
+  restartBtn.onPointerClickObservable.add(function () {
+    console.log("重启引擎")
+  });
+
+  //初始化速度选择弹窗框（包含了龟速和兔速按钮的向上弹出框）
+  speedSelect = new GUI.Rectangle("speedSelect");
+  speedSelect.height = "110px";
+  speedSelect.width = "60px";
+  speedSelect.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+  speedSelect.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM
+  speedSelect.top = "-90px"
+  speedSelect.left = "20px"
+  speedSelect.thickness = 3;
+  speedSelect.color = "#505781";
+  speedSelect.background = "white";
+  speedSelect.cornerRadius = 15;
+  speedSelect.isVisible = false
+
+  //初始化龟速按钮
+  var slowImg = GUI.Button.CreateImageOnlyButton(
+      "slowlyBtn",
+      url + "turtle.png"
+  );
+  slowImg.width = "30px";
+  slowImg.height = "30px";
+  slowImg.thickness = 0;
+  slowImg.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
+  slowImg.top = 15;
+  slowImg.onPointerClickObservable.add(function () {
+    console.log("slowImg click")
+    image.source = url + "turtle.png"
+    // robotCotroller.setSpeed(1)
+    //后续通过robot控制器实例设置移动速度参数
+    console.log('设置移动速度：1')
+    speedSelect.isVisible = false//选择完，关闭速度选择弹窗
+  });
+
+  //初始化兔速按钮
+  var fastImg = GUI.Button.CreateImageOnlyButton(
+      "fastBtn",
+      url + "rabbit.png"
+  );
+  fastImg.width = "30px";
+  fastImg.height = "30px";
+  fastImg.thickness = 0;
+  fastImg.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM
+  fastImg.top = -15;
+  fastImg.onPointerClickObservable.add(function () {
+    console.log("fastImg click")
+    image.source = url + "rabbit.png"
+    // robotCotroller.setSpeed(6)
+    console.log('设置移动速度：6')
+    speedSelect.isVisible = false//选择完，关闭速度选择弹窗
+  });
+
+  speedSelect.addControl(slowImg)
+  speedSelect.addControl(fastImg)
+
+  //当前选择速度模式按钮（点击会弹出速度选择弹窗）
+  var speedBtn = new GUI.Button("speedBtn");
+  speedBtn.height = "60px";
+  speedBtn.width = "60px";
+  speedBtn.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+  speedBtn.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM
+  speedBtn.top = "-20px"
+  speedBtn.left = "20px"
+  speedBtn.thickness = 0;
+  speedBtn.onPointerClickObservable.add(function () {
+    speedSelect.isVisible = !speedSelect.isVisible
+    if (speedSelect.isVisible) {
+      buttonClicked = true//设置速度选择弹窗弹窗状态为true，用于弹窗后移动模型时取消弹窗状态
+    }
+  });
+
+  //当前选择速度模式按钮的边框
+  var speedBtnBorder = new GUI.Ellipse();
+  speedBtnBorder.width = "60px"
+  speedBtnBorder.height = "60px";
+  speedBtnBorder.color = "#505781";
+  speedBtnBorder.thickness = 3;
+  speedBtnBorder.background = "white";
+  //当前选择速度模式按钮的图案
+  var image = new GUI.Image("currentSpeedBtn", url + "turtle.png");
+  image.width = "30px";
+  image.height = "30px";
+  image.thickness = 0;
+  speedBtn.addControl(speedBtnBorder);
+  speedBtn.addControl(image);
+
+  //将按钮添加在全屏的2d前景界面中
+  advancedTexture.addControl(restartBtn);
+  advancedTexture.addControl(speedBtn);
+  advancedTexture.addControl(speedSelect);
+}
+
+
+/**
+ * 相机动画
+ * @param toAlpha  动画完成时的alpha
+ * @param toBeta  动画完成时的beta
+ * @param toRadius 动画完成时的radius
+ * @constructor
+ */
+function ArcAnimation(toAlpha, toBeta, toRadius) {
+
+  let animCamAlpha = new BABYLON.Animation("animCam",
+      "alpha",//需要设置动画的属性名称
+      30,//每秒帧数
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,//属性变量类型  浮点型
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT//动画循环模式 保持最终状态
+  );
+
+  let begin = 0, end = 100
+
+  let keysAlpha = [];//alpha动画关键帧列表，从0-100%，alpha从camera.alpha变化到传入的toAlpha参数值
+  keysAlpha.push({
+    frame: begin,
+    value: camera.alpha
+  });
+  keysAlpha.push({
+    frame: end,
+    value: toAlpha
+  });
+  animCamAlpha.setKeys(keysAlpha)//配置动画关键帧列表到动画对象中
+
+  //初始化beta动画参数
+  let animCamBeta = new BABYLON.Animation("animCam", "beta", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT)
+  let keysBeta = []
+  keysBeta.push({frame: begin, value: camera.beta})
+  keysBeta.push({frame: end, value: toBeta})
+  animCamBeta.setKeys(keysBeta)
+
+  //初始化radius动画参数
+  let animCamRadius = new BABYLON.Animation("animCam", "radius", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT)
+  let keysRadius = [];
+  keysRadius.push({frame: begin, value: camera.radius})
+  keysRadius.push({frame: end, value: toRadius})
+  animCamRadius.setKeys(keysRadius)
+
+  //加入相机动画列表中
+  camera.animations.push(animCamAlpha, animCamBeta, animCamRadius)
+
+  //通过scene开启camera的动画列表
+  scene.beginAnimation(
+      camera,//开始动画列表的对象
+      begin,//动画开始帧
+      end,//动画结束帧
+      false,//动画是否循环
+      6,//动画的速度比
+      () => {
+        console.log('camera')
+      }//动画执行完成回调
+  )
+}
+
+function hideLoadingUI() {
+  engine.hideLoadingUI()
+  document.getElementById("customLoadingScreenDiv").remove()
+}
+
+function customLoadingUI() {
+
+  BABYLON.DefaultLoadingScreen.prototype.displayLoadingUI = function () {
+    this._loadingDiv = document.createElement("div");
+    this._loadingDiv.id = "customLoadingScreenDiv";
+    this._loadingDiv.style.background = "#505781";
+    this._loadingDiv.style.zIndex = "10006"
+    this._loadingDiv.style.height = "100%"
+
+    var img = new Image()
+    img.src = url + "loading.gif";
+    img.style.padding = "15%";
+    img.style.paddingTop = "30%";
+    this._loadingDiv.appendChild(img);
+
+    this._resizeLoadingUI();
+    window.addEventListener("resize", this._resizeLoadingUI);
+
+    //这两个样式修改需要在this._resizeLoadingUI之后，因为该函数执行后会相对window窗口定位出cavans的位置，然后设置loading的位置
+    //而我们需要的是将其插入到可移动窗口中，以统一窗口的开启关闭
+    this._loadingDiv.style.left = "10px"
+    this._loadingDiv.style.top = "39px"
+
+    // document.body.appendChild(this._loadingDiv);
+    // 修改为
+    // 获取当前可移动窗口元素
+    let window1 = document.getElementById('window1')
+    let header = document.getElementById('header')
+    window1.insertBefore(this._loadingDiv,header)
+  };
+
+  engine.displayLoadingUI();
 }
 
 async function initAmmo() {
@@ -87,7 +382,7 @@ function addPhysicEffect() {
 
 function makePhysicsObjects(newMeshes, scene, scaling, size) {
   var physicsRoot = new BABYLON.Mesh("robot", scene);
-  physicsRoot.position.y -= 2
+  // physicsRoot.position.y -= 2
   newMeshes.forEach((m) => {
     if (m.parent == null) {
       physicsRoot.addChild(m)
@@ -99,7 +394,6 @@ function makePhysicsObjects(newMeshes, scene, scaling, size) {
     m.scaling.x = Math.abs(m.scaling.x)
     m.scaling.y = Math.abs(m.scaling.y)
     m.scaling.z = Math.abs(m.scaling.z)
-    // console.log("m.name",m.name)
     m.physicsImpostor = new BABYLON.PhysicsImpostor(m, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0.1}, scene);
   })
 
@@ -184,7 +478,8 @@ function initCubes() {
 }
 
 //创建带碰撞体的方块
-function createBasicRoundedBox(scene, name, size, mass = 0.25, restitution = 0.5, friction = 0.5) {
+function createBasicRoundedBox(scene, name, size) {
+  let mass = 0.25, restitution = 0.5, friction = 0.5
   const boxSide = size;
   const sphereSide = boxSide * 3.1 / 2;
   const sphere = BABYLON.MeshBuilder.CreateSphere('sphere', {diameter: sphereSide, segments: 16}, scene);
@@ -236,7 +531,7 @@ function dragListening() {
     var pickInfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) {
       return (mesh !== ground && mesh !== plane && mesh !== skybox);
     });
-    console.log("pickInfo", pickInfo)
+    // console.log("pickInfo", pickInfo)
     //如果hit为true，则不为地板、天空盒等对象
     if (pickInfo.hit) {
       currentMesh = pickInfo.pickedMesh;//获取当前点击对象
@@ -283,6 +578,13 @@ function dragListening() {
 
   //鼠标点击后松开
   var onPointerUp = function () {
+    //如果速度选择窗口位关闭，则关闭窗口
+    if (buttonClicked) {
+      buttonClicked = false
+      speedSelect.isVisible = false
+    }
+
+
     //恢复相机移动控制
     if (startingPoint) {
       camera.attachControl(canvas, true);
@@ -307,16 +609,6 @@ async function initRobot() {
   var result = await BABYLON.SceneLoader.ImportMeshAsync(null, url, modelName, scene);
   var meshes = result.meshes
   console.log("meshes", meshes)
-  // 直接构造一个car的父节点，然后实例化
-  // var parent = new BABYLON.Mesh("car", scene);
-  // const scale = 10//缩放比例
-  // for (var mesh of meshes) {
-  //   mesh.scaling = new BABYLON.Vector3(scale, scale, scale)
-  //   mesh.parent = parent
-  // }
-  // //将根节点设置为全局变量
-  // car = parent
-
   //不直接实例化小车节点，car对象存储meshes网格列表，在小车引入碰撞体后再实例化
   car = meshes
 }
@@ -338,8 +630,12 @@ function initScene() {
   });
 
   //相机初始化
-  camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 5, new BABYLON.Vector3(0, 0, 10), scene);
-  camera.setPosition(new BABYLON.Vector3(20, 200, 400));
+  camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(0, 0, 0), scene);
+  //这里的值可通过课程6的相机控制手动控制获取期望位置
+  camera.alpha = 1.1383885512243588
+  camera.beta = 1.3642551964995249
+  camera.radius = 50
+  // (new BABYLON.Vector3(18, 9, 39));
   //相机角度限制
   camera.upperBetaLimit = 1.5;//最大z轴旋转角度差不多45度俯瞰
   camera.lowerRadiusLimit = 50;//最小缩小比例
@@ -402,12 +698,38 @@ function initScene() {
 export default {
   name: "test",
   data() {
-    return {}
+    return {
+      show3Dcanvans: true,
+      //移动窗口配置
+      windowParams: {
+        movable: true,
+        resizable: false
+      }
+    }
   },
   async mounted() {
     //加载场景
     await loadScene()
   },
+  methods: {
+    setCameraPosition(type, value) {
+      console.log(type, value)
+
+      switch (type) {
+        case 'alpha':
+          camera.alpha += value
+          break;
+        case 'beta':
+          camera.beta += value
+          break
+        case 'radius':
+          camera.radius += value
+          break
+      }
+      let {alpha, beta, radius} = camera
+      console.log(`更改后的值:${alpha},${beta},${radius}`)
+    }
+  }
 }
 </script>
 
@@ -418,5 +740,30 @@ export default {
   touch-action: none;
   z-index: 10000;
   border-radius: 10px;
+}
+
+.btn {
+  background-color: #D9D9D9;
+  padding: 2px 15px;
+  margin: 5px;
+  border-radius: 4px;
+  width: 50px;
+}
+
+#window1 {
+  background-color: #505781;
+  border-radius: 10px;
+  width: 700px;
+  position: absolute;
+  top: 5px;
+  right: 55px;
+  z-index: 10005;
+}
+
+
+.header {
+  padding: 10px 20px 5px 20px;
+  color: white;
+  display: flex;
 }
 </style>

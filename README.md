@@ -1,21 +1,37 @@
 # 少儿编程
+
 ## 介绍
-+ 基于vue框架，使用blockly和babylonjs实现的少儿编程网页
+
+- 基于 vue 框架，使用 blockly 和 babylonjs 实现的少儿编程网页
+
 ## 博客
+
 https://blog.csdn.net/weixin_41895625
+
 ## 实现效果
+
 ### 主页
+
 ![img.png](src/assets/readme/img.png)
+
 ### 游戏页
+
 ![img_2.png](src/assets/readme/img_2.png)
+
 ### 案例编辑页
+
 ![img_3.png](src/assets/readme/img_3.png)
+
 ### 板块编辑页
+
 ![img_4.png](src/assets/readme/img_4.png)
 
 ## 服务器后端
+
 https://github.com/Wenbile/Child-Programming-Server
+
 ## 项目结构
+
 ```
 ├── LICENSE
 ├── README.md
@@ -33,7 +49,7 @@ https://github.com/Wenbile/Child-Programming-Server
 │   │   ├── Modal.vue //自定义模态弹窗组件
 │   │   └── Nav.vue //自定义导航栏组件
 │   ├── main.js //主函数，这里初始化Vue工程，配置全局变量
-│   ├── plugins 
+│   ├── plugins
 │   │   └── vuetify.js // 引入vuetify核心库
 │   ├── request.js // 封装请求方法
 │   ├── router
@@ -65,38 +81,49 @@ https://github.com/Wenbile/Child-Programming-Server
 └── vue.config.js
 ```
 
-## npm版本
+## Class 目录下的均为博客案例，访问`/#/Class/classxxx`可查看示例
+
+## npm 版本
+
 ```
 npm -v
 7.6.3
 ```
 
 ## 在安装所有软件包时关闭 npm 审计
+
 ```
 npm set audit false
 ```
 
 ## 安装依赖
+
 ```
 npm install
 ```
 
-## 替换node_modules中文件
-npm完blockly后需要将
+## 替换 node_modules 中文件
+
+npm 完 blockly 后需要将
+
 ```angular2html
 node_modules/blockly/blockly_compressed.js
 ```
+
 替换为根目录的
+
 ```
 blockly_compressed.js
 ```
 
 ## 编译调试
+
 ```
 npm run serve
 ```
 
 ## 构建程序
+
 ```
 npm run build
 ```

@@ -9,7 +9,7 @@
       <v-app-bar-nav-icon large @click="drawer = true"></v-app-bar-nav-icon>
 
       <v-spacer></v-spacer>
-      <v-toolbar-title style="color: #64A70A;font-size: 30px" class="font-weight-black">imRobot</v-toolbar-title>
+      <v-toolbar-title style="color: #64A70A;font-size: 30px" class="font-weight-black">WB积木式少儿编程平台</v-toolbar-title>
       <v-spacer></v-spacer>
 
 
@@ -37,13 +37,13 @@
             <v-list-item-title>主页</v-list-item-title>
           </v-list-item>
 
-          <v-list-item>
+          <v-list-item v-if="adminMode">
             <v-list-item-icon>
               <v-icon>mdi-book-edit</v-icon>
             </v-list-item-icon>
             <v-list-item-title>案例编辑</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item v-if="false">
             <v-list-item-icon>
               <v-icon>mdi-book-edit</v-icon>
             </v-list-item-icon>
@@ -59,7 +59,7 @@
 <script>
 export default {
   name: "Nav",
-
+  props: ['adminMode'],
   data() {
     return {
       drawer:false,

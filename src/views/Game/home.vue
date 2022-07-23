@@ -2,7 +2,7 @@
   <v-app id="inspire">
     <v-card class="overflow-hidden">
       <!--  导航栏  -->
-      <Nav @newProject="newProject"></Nav>
+      <Nav :adminMode="adminMode" @newProject="newProject"></Nav>
 
       <v-sheet
           id="scrolling-techniques-7"
@@ -312,7 +312,8 @@ export default {
       deleteProjectdialog: false,//删除项目弹窗
       currentSelectProject: {},//当前编辑项目
       currentSelectProjectName: "",
-      coverUrl: this.$robotApi.coverUrl //卡片封面的url头
+      coverUrl: this.$robotApi.coverUrl, //卡片封面的url头
+      adminMode: false
     }
   },
 
@@ -412,6 +413,10 @@ export default {
   },
 
   async mounted() {
+
+    if(this.$route.query.admin){
+      this.adminMode = true
+    }
 
     // 获取浏览器可视区域高度
     this.clientHeight = document.documentElement.clientHeight
