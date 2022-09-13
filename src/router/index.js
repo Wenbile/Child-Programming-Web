@@ -84,6 +84,11 @@ const routes = [
     name: 'blockClass3',
     component: ()=> import('../views/Class/blockClass3/blockClass3')
   },
+  {
+    path: "/Class/blockclass4",
+    name: 'blockClass4',
+    component: ()=> import('../views/Class/blockClass4/blockClass4')
+  }
 ]
 
 const router = new VueRouter({
