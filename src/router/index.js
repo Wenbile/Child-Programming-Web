@@ -12,7 +12,7 @@ const routes = [
   {
     path: "/Game/game",
     name: 'game',
-    component: ()=> import('../views/Game/home')
+    component: ()=> import('../views/Game/game')
   },
   {
     path: "/Game/caseEdit",
